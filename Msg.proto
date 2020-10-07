@@ -1,0 +1,12 @@
+syntax = "proto2";
+
+message transaction_t {
+	required int32 sender_id = 1;
+	required int32 receiver_id = 2;
+    required int32 amount = 3;
+}
+		
+message	message_t {
+	required int32 timestamp = 1;
+	required transaction_t transaction = 2;
+}
