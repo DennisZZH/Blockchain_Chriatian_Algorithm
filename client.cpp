@@ -78,6 +78,7 @@ void client::simulate_time() {   // REVIEW: Need to verify this function.
             uint64_t dt_ns = get_dt_nanosec(prev_systime, curr_systime);
             increase_time(local_time, (uint64_t)(dt_ns * (1 + TIME_DRIFT_FACTOR)));
             memcpy(&prev_systime, &curr_systime, sizeof(curr_systime));
+            // TODO: Update the simulated time.
         }
 
         // Check if the time difference between clients pass the max tolerable drift.
@@ -86,6 +87,7 @@ void client::simulate_time() {   // REVIEW: Need to verify this function.
             clock_gettime(CLOCK_REALTIME, &curr_systime);
             memcpy(&last_synctime, &curr_systime, sizeof(curr_systime));
             memcpy(&prev_systime, &curr_systime, sizeof(curr_systime));
+            // TODO: Update the simulated_time.
         }
         
         // Here need to sleep for a while to save CPU resources. Yet it shouldn't sleep long.
