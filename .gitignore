@@ -1,3 +1,14 @@
+# Folders
+.vscode
+
+# Others
+Msg.pb.cc
+Msg.pb.h
+
+# Executables
+client
+server
+
 # Prerequisites
 *.d
 
@@ -30,3 +41,5 @@
 *.exe
 *.out
 *.app
+
+# .gitignore
