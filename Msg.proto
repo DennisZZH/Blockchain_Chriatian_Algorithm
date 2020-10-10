@@ -12,7 +12,7 @@ message	message_t {
 	required transaction_t transaction = 3;
 }
 
-message time_t {
+message timestamp_t {
 	required int64 seconds = 1;
 	required int32 nanos = 2;
 }

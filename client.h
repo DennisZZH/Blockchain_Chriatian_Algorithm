@@ -8,6 +8,8 @@
 #include <time.h>
 #include "Msg.pb.h"
 
+using namespace std;
+
 class client{
 public:
     client(int cid);
