@@ -14,7 +14,12 @@
  * @brief TIME_DIFF_TOLERANCE means the maximum tolerable time difference between different client.
  * 
  */
-#define TIME_DIFF_TOLERANCE  200000000
-
+#define TIME_DIFF_TOLERANCE 200000000
 
 #define TIME_DRIFT_FACTOR   0.2
+
+/**
+ * @brief The upper bound of the communication delay in seconds.
+ * 
+ */
+#define COMM_DELAY_MAX      5
