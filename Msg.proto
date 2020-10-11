@@ -16,3 +16,7 @@ message timestamp_t {
 	required int64 seconds = 1;
 	required int32 nanos = 2;
 }
+
+message request_t {
+	required int32 type = 1;
+}
