@@ -1,14 +1,15 @@
 syntax = "proto2";
 
 message transaction_t {
-	required int32 sender_id = 1;
-	required int32 receiver_id = 2;
-    required float amount = 3;
+	required int32 type = 1;
+	optional int32 sender_id = 2;
+	optional int32 receiver_id = 3;
+    optional float amount = 4;
 }
 		
 message	message_t {
-	required timestamp_t timestamp = 1;
-	required int32 client_id = 2;
+	required int32 client_id = 1;
+	required timestamp_t timestamp = 2;
 	required transaction_t transaction = 3;
 }
 
