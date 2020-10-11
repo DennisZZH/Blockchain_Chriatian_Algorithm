@@ -33,7 +33,14 @@ client::~client() {
 }
 
 float client::get_balance(){
-    return 0.0;
+    float balance = 0.f;
+    std::list<transaction_t>::iterator it;
+    for (it = blockchain.begin(); it != blockchain.end(); it++) {
+        if (it->receiver_id() == client_id && it->sender_id() != client_id) {
+            balance += it->amount();
+        }
+    }
+    return balance;
 }
 
 
@@ -73,11 +80,6 @@ int client::balance_transaction() {
     }
     // Need to pop out the message. (Currently, the msg_index is pointing to the first message later than the balance_timestamp).
     message_buffer.erase(message_buffer.begin(), message_buffer.begin() + msg_index);
-    
-    // Calculate the total balance.
-    // REVIEW: May need to move the balance displaying function outside to isolate UI and the client.
-    float balance = calc_balance();
-    std::cout << "Current Balance: " << balance << std::endl;
     return 0;
 }
     
@@ -86,17 +88,6 @@ int client::transfer_transaction(int sid, int rid, float amt) {
 }
 
 // Private functions
-float client::calc_balance() {
-    float balance = 0.f;
-    std::list<transaction_t>::iterator it;
-    for (it = blockchain.begin(); it != blockchain.end(); it++) {
-        if (it->receiver_id() == client_id && it->sender_id() != client_id) {
-            balance += it->amount();
-        }
-    }
-    return balance;
-}
-
 void client::sync_server_time(timespec& time) {
     timespec t0, t1;
     clock_gettime(CLOCK_REALTIME, &t0);

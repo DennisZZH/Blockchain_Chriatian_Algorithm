@@ -41,7 +41,6 @@ private:
     void get_simulated_time(timespec& result);
     void set_simulated_time(timespec& time);  
     void sync_server_time(timespec& time);
-    float calc_balance();
 
     // Thread Tasks
     void simulate_time();
