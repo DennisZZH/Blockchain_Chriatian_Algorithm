@@ -1,9 +1,22 @@
 #include <thread>
 #include <chrono>
 #include <time.h>
-#include "parameters.h"
+#include <cstdlib>
+#include <iostream>
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/socket.h>
+#include <unistd.h>
+#include <arpa/inet.h>
+#include <string.h>
+#include <netdb.h> 
+#include <errno.h>
+#include <sys/time.h>
+
 #include "client.h"
 #include "utility.h"
+#include "parameters.h"
+#include "Msg.pb.h"
 
 #define BALANCE_TRANSACTION_TYPE 1
 #define TRANSFER_TRANSACTION_TYPE 2
@@ -27,13 +40,13 @@ client::client(int cid) {
     port_id_UDP = 8020 + cid;
 
     // Establish TCP connection to the Time Server
-    connect_server_thread();
+    connect_to_server();
 
     // Setup UDP connection with peer clients
     setup_peer_connection();
 
     // Spawn a Thread for continously receiving from peer clients
-    receive_msg_thread = thread(receive_msg);
+    receive_msg_thread = thread(&client::receive_msg, this);
 
     // Spawn a Thread for simulating time
     // Initialize time
@@ -64,7 +77,7 @@ int client::balance_transaction() {
     get_simulated_time(balance_timestamp);
 
     // Broadcast this balance transaction message to all peer clients   
-    broadcast_msg(BALANCE_TRANSACTION_TYPE, balance_timestamp);
+    // broadcast_msg(BALANCE_TRANSACTION_TYPE, balance_timestamp);
 
     std::this_thread::sleep_for(std::chrono::seconds(COMM_DELAY_MAX));
 
@@ -126,8 +139,8 @@ void client::sync_server_time(timespec& time) {
     // Send request to server
     request_t r;
     std::string msg_str;
-    r.set_type = 1;
-    r.SerializedToString(&msg_str);
+    r.set_type(1);
+    r.SerializeToString(&msg_str);
     if(send(sockfd_TCP, msg_str.c_str(), sizeof(request_t), 0) < 0){
         std::cerr<<"Error: Failed to send out the request to time server!"<<std::endl;
         exit(0);
@@ -262,7 +275,7 @@ void client::setup_peer_connection() {
     if (bind(sockfd_UDP, (const struct sockaddr *)&servaddr, sizeof(servaddr)) < 0)
     {
         std::cerr << "Socket bind failed!\n";
-        exit(0);
+        exit(0); 
     }
 
     std::cout << "UDP Socket created.\n";
@@ -281,7 +294,7 @@ void client::receive_msg() {
         bzero(buf, sizeof(buf));
         bzero(&str_message, sizeof(str_message));
         int len = sizeof(recvaddr);
-        read_size = recvfrom(sockfd, buf, sizeof(buf), MSG_WAITALL, (struct sockaddr *)&recvaddr, (socklen_t *)&len);
+        read_size = recvfrom(sockfd_UDP, buf, sizeof(buf), MSG_WAITALL, (struct sockaddr *)&recvaddr, (socklen_t *)&len);
         if (read_size < 0)
         {
             std::cerr << "Error: Failed to receive message!"
@@ -300,50 +313,7 @@ void client::receive_msg() {
     }
 }
 
-void client::broadcast_msg(int type, timespec timestamp) {
-    // Prepare message
-    transaction_t t;
-    t.set_type(type);
-    message_t m;
-    m.set_client_id(client_id);
-    m.set_timestamp(timestamp);
-    m.set_transaction(t);
-    std::string str_msg = m.SerializedAsString();
-
-    // Figure out peer port number
-    int peer_port1 = 8020, peer_port2 = 8020;
-    if (client_id == 1) {
-        peer_port1 += 2;
-        peer_port2 += 3;
-    }
-    else if (client_id == 2) {
-        peer_port1 += 1;
-        peer_port2 += 3;
-    }
-    else {
-        peer_port1 += 1;
-        peer_port2 += 2;
-    }
-
-    // TODO
-    // server ip better moved to utility file, for now it is hard coded here
-    char* server_ip = "127.0.0.1";
-    
-    // Filling peer information and send
-    struct sockaddr_in peeraddr;
-    memset(&peeraddr, 0, sizeof(peeraddr)); 
-    peeraddr.sin_family = AF_INET; 
-    peeraddr.sin_addr.s_addr = inet_addr(server_ip); 
-    
-    peeraddr.sin_port = htons(peer_port1); 
-    sendto(sockfd_UDP, str_msg.c_str(), sizeof(message_t), 0, (const sockaddr *)&peeraddr, sizeof(peeraddr));
-
-    peeraddr.sin_port = htons(peer_port2); 
-    sendto(sockfd_UDP, str_msg.c_str(), sizeof(message_t), 0, (const sockaddr *)&peeraddr, sizeof(peeraddr));
-
-}       
-
-void client::broadcast_msg(int type, timespec t, int recv_id, int amt) {
+void client::broadcast_msg(int type, timespec& time, int recv_id, int amt) {
     // Prepare message
     transaction_t t;
     t.set_type(type);
@@ -352,9 +322,10 @@ void client::broadcast_msg(int type, timespec t, int recv_id, int amt) {
     t.set_amount(amt);
     message_t m;
     m.set_client_id(client_id);
-    m.set_timestamp(timestamp);
+    m.set_timestamp(time);
+    // need to transalate timespec to timestamp_t
     m.set_transaction(t);
-    std::string str_msg = m.SerializedAsString();
+    std::string str_msg = m.SerializeAsString();
 
     // Figure out peer port number
     int peer_port1 = 8020, peer_port2 = 8020;

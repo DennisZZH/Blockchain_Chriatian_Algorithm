@@ -188,25 +188,11 @@ class transaction_t :
   // accessors -------------------------------------------------------
 
   enum : int {
-    kTypeFieldNumber = 1,
-    kSenderIdFieldNumber = 2,
-    kReceiverIdFieldNumber = 3,
-    kAmountFieldNumber = 4,
+    kSenderIdFieldNumber = 1,
+    kReceiverIdFieldNumber = 2,
+    kAmountFieldNumber = 3,
   };
-  // required int32 type = 1;
-  bool has_type() const;
-  private:
-  bool _internal_has_type() const;
-  public:
-  void clear_type();
-  ::PROTOBUF_NAMESPACE_ID::int32 type() const;
-  void set_type(::PROTOBUF_NAMESPACE_ID::int32 value);
-  private:
-  ::PROTOBUF_NAMESPACE_ID::int32 _internal_type() const;
-  void _internal_set_type(::PROTOBUF_NAMESPACE_ID::int32 value);
-  public:
-
-  // optional int32 sender_id = 2;
+  // required int32 sender_id = 1;
   bool has_sender_id() const;
   private:
   bool _internal_has_sender_id() const;
@@ -219,7 +205,7 @@ class transaction_t :
   void _internal_set_sender_id(::PROTOBUF_NAMESPACE_ID::int32 value);
   public:
 
-  // optional int32 receiver_id = 3;
+  // required int32 receiver_id = 2;
   bool has_receiver_id() const;
   private:
   bool _internal_has_receiver_id() const;
@@ -232,7 +218,7 @@ class transaction_t :
   void _internal_set_receiver_id(::PROTOBUF_NAMESPACE_ID::int32 value);
   public:
 
-  // optional float amount = 4;
+  // required float amount = 3;
   bool has_amount() const;
   private:
   bool _internal_has_amount() const;
@@ -249,10 +235,12 @@ class transaction_t :
  private:
   class _Internal;
 
+  // helper for ByteSizeLong()
+  size_t RequiredFieldsByteSizeFallback() const;
+
   ::PROTOBUF_NAMESPACE_ID::internal::InternalMetadataWithArena _internal_metadata_;
   ::PROTOBUF_NAMESPACE_ID::internal::HasBits<1> _has_bits_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
-  ::PROTOBUF_NAMESPACE_ID::int32 type_;
   ::PROTOBUF_NAMESPACE_ID::int32 sender_id_;
   ::PROTOBUF_NAMESPACE_ID::int32 receiver_id_;
   float amount_;
@@ -744,37 +732,9 @@ class request_t :
 #endif  // __GNUC__
 // transaction_t
 
-// required int32 type = 1;
-inline bool transaction_t::_internal_has_type() const {
-  bool value = (_has_bits_[0] & 0x00000001u) != 0;
-  return value;
-}
-inline bool transaction_t::has_type() const {
-  return _internal_has_type();
-}
-inline void transaction_t::clear_type() {
-  type_ = 0;
-  _has_bits_[0] &= ~0x00000001u;
-}
-inline ::PROTOBUF_NAMESPACE_ID::int32 transaction_t::_internal_type() const {
-  return type_;
-}
-inline ::PROTOBUF_NAMESPACE_ID::int32 transaction_t::type() const {
-  // @@protoc_insertion_point(field_get:transaction_t.type)
-  return _internal_type();
-}
-inline void transaction_t::_internal_set_type(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  _has_bits_[0] |= 0x00000001u;
-  type_ = value;
-}
-inline void transaction_t::set_type(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  _internal_set_type(value);
-  // @@protoc_insertion_point(field_set:transaction_t.type)
-}
-
-// optional int32 sender_id = 2;
+// required int32 sender_id = 1;
 inline bool transaction_t::_internal_has_sender_id() const {
-  bool value = (_has_bits_[0] & 0x00000002u) != 0;
+  bool value = (_has_bits_[0] & 0x00000001u) != 0;
   return value;
 }
 inline bool transaction_t::has_sender_id() const {
@@ -782,7 +742,7 @@ inline bool transaction_t::has_sender_id() const {
 }
 inline void transaction_t::clear_sender_id() {
   sender_id_ = 0;
-  _has_bits_[0] &= ~0x00000002u;
+  _has_bits_[0] &= ~0x00000001u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::int32 transaction_t::_internal_sender_id() const {
   return sender_id_;
@@ -792,7 +752,7 @@ inline ::PROTOBUF_NAMESPACE_ID::int32 transaction_t::sender_id() const {
   return _internal_sender_id();
 }
 inline void transaction_t::_internal_set_sender_id(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  _has_bits_[0] |= 0x00000002u;
+  _has_bits_[0] |= 0x00000001u;
   sender_id_ = value;
 }
 inline void transaction_t::set_sender_id(::PROTOBUF_NAMESPACE_ID::int32 value) {
@@ -800,9 +760,9 @@ inline void transaction_t::set_sender_id(::PROTOBUF_NAMESPACE_ID::int32 value) {
   // @@protoc_insertion_point(field_set:transaction_t.sender_id)
 }
 
-// optional int32 receiver_id = 3;
+// required int32 receiver_id = 2;
 inline bool transaction_t::_internal_has_receiver_id() const {
-  bool value = (_has_bits_[0] & 0x00000004u) != 0;
+  bool value = (_has_bits_[0] & 0x00000002u) != 0;
   return value;
 }
 inline bool transaction_t::has_receiver_id() const {
@@ -810,7 +770,7 @@ inline bool transaction_t::has_receiver_id() const {
 }
 inline void transaction_t::clear_receiver_id() {
   receiver_id_ = 0;
-  _has_bits_[0] &= ~0x00000004u;
+  _has_bits_[0] &= ~0x00000002u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::int32 transaction_t::_internal_receiver_id() const {
   return receiver_id_;
@@ -820,7 +780,7 @@ inline ::PROTOBUF_NAMESPACE_ID::int32 transaction_t::receiver_id() const {
   return _internal_receiver_id();
 }
 inline void transaction_t::_internal_set_receiver_id(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  _has_bits_[0] |= 0x00000004u;
+  _has_bits_[0] |= 0x00000002u;
   receiver_id_ = value;
 }
 inline void transaction_t::set_receiver_id(::PROTOBUF_NAMESPACE_ID::int32 value) {
@@ -828,9 +788,9 @@ inline void transaction_t::set_receiver_id(::PROTOBUF_NAMESPACE_ID::int32 value)
   // @@protoc_insertion_point(field_set:transaction_t.receiver_id)
 }
 
-// optional float amount = 4;
+// required float amount = 3;
 inline bool transaction_t::_internal_has_amount() const {
-  bool value = (_has_bits_[0] & 0x00000008u) != 0;
+  bool value = (_has_bits_[0] & 0x00000004u) != 0;
   return value;
 }
 inline bool transaction_t::has_amount() const {
@@ -838,7 +798,7 @@ inline bool transaction_t::has_amount() const {
 }
 inline void transaction_t::clear_amount() {
   amount_ = 0;
-  _has_bits_[0] &= ~0x00000008u;
+  _has_bits_[0] &= ~0x00000004u;
 }
 inline float transaction_t::_internal_amount() const {
   return amount_;
@@ -848,7 +808,7 @@ inline float transaction_t::amount() const {
   return _internal_amount();
 }
 inline void transaction_t::_internal_set_amount(float value) {
-  _has_bits_[0] |= 0x00000008u;
+  _has_bits_[0] |= 0x00000004u;
   amount_ = value;
 }
 inline void transaction_t::set_amount(float value) {

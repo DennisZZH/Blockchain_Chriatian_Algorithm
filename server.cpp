@@ -13,6 +13,9 @@
 #include "Msg.pb.h"
 #include <sys/time.h>
 
+#define REQUEST_TIME_TYPE 1
+#define REQUEST_STOP_TYPE 2
+
 server::server() {
     server_ip = "127.0.0.1";
     server_port = 8000;
@@ -74,7 +77,7 @@ int server::set_up_connection() {
     return 0;
 }
 
-void* manage_clients(void* args) {
+void* server::manage_clients(void* args) {
      // Manage clients' requests using this function
     // args: 1. client id  2. sockfd: the listening socket for the corresponding process
     int cid = *(int*)args;
@@ -83,10 +86,10 @@ void* manage_clients(void* args) {
     timestamp_t timestamp_msg;
 
     // A while loop receiving from the corresponding client
-    char buffer[sizeof(Msg)];
+    char buffer[sizeof(request_t)];
     int read_size, sizeleft;
     while (true) {
-        sizeleft = sizeof(Msg);
+        sizeleft = sizeof(request_t);
         std::string strMessage;
         while (sizeleft != 0) {
             if ((read_size = recv(cur_sockfd, buffer, sizeof(buffer), 0)) < 0) {
@@ -101,7 +104,7 @@ void* manage_clients(void* args) {
         m.ParseFromString(strMessage);
 
         // type 1 for request, type 2 for quit
-        if (m.type() == 2) {
+        if (m.type() == REQUEST_STOP_TYPE) {
             std::cout << "Client " << cid << " exits.\n";
             break;
         }
@@ -126,9 +129,8 @@ void* manage_clients(void* args) {
     return NULL;
 }
 
-int run_time_server() {
-    argus procArgu[3];
-
+int server::run_time_server() {
+   
     // Create two extra threads to handle messages from client 2 and 3
     int cids[3];
     for (int i = 1; i < 3; i++) {

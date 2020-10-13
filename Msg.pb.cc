@@ -100,14 +100,12 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_Msg_2eproto::offsets[] PROTOBU
   ~0u,  // no _extensions_
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
-  PROTOBUF_FIELD_OFFSET(::transaction_t, type_),
   PROTOBUF_FIELD_OFFSET(::transaction_t, sender_id_),
   PROTOBUF_FIELD_OFFSET(::transaction_t, receiver_id_),
   PROTOBUF_FIELD_OFFSET(::transaction_t, amount_),
   0,
   1,
   2,
-  3,
   PROTOBUF_FIELD_OFFSET(::message_t, _has_bits_),
   PROTOBUF_FIELD_OFFSET(::message_t, _internal_metadata_),
   ~0u,  // no _extensions_
@@ -137,10 +135,10 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_Msg_2eproto::offsets[] PROTOBU
   0,
 };
 static const ::PROTOBUF_NAMESPACE_ID::internal::MigrationSchema schemas[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
-  { 0, 9, sizeof(::transaction_t)},
-  { 13, 21, sizeof(::message_t)},
-  { 24, 31, sizeof(::timestamp_t)},
-  { 33, 39, sizeof(::request_t)},
+  { 0, 8, sizeof(::transaction_t)},
+  { 11, 19, sizeof(::message_t)},
+  { 22, 29, sizeof(::timestamp_t)},
+  { 31, 37, sizeof(::request_t)},
 };
 
 static ::PROTOBUF_NAMESPACE_ID::Message const * const file_default_instances[] = {
@@ -151,13 +149,13 @@ static ::PROTOBUF_NAMESPACE_ID::Message const * const file_default_instances[] =
 };
 
 const char descriptor_table_protodef_Msg_2eproto[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) =
-  "\n\tMsg.proto\"U\n\rtransaction_t\022\014\n\004type\030\001 \002"
-  "(\005\022\021\n\tsender_id\030\002 \001(\005\022\023\n\013receiver_id\030\003 \001"
-  "(\005\022\016\n\006amount\030\004 \001(\002\"d\n\tmessage_t\022\021\n\tclien"
-  "t_id\030\001 \002(\005\022\037\n\ttimestamp\030\002 \002(\0132\014.timestam"
-  "p_t\022#\n\013transaction\030\003 \002(\0132\016.transaction_t"
-  "\"-\n\013timestamp_t\022\017\n\007seconds\030\001 \002(\003\022\r\n\005nano"
-  "s\030\002 \002(\005\"\031\n\trequest_t\022\014\n\004type\030\001 \002(\005"
+  "\n\tMsg.proto\"G\n\rtransaction_t\022\021\n\tsender_i"
+  "d\030\001 \002(\005\022\023\n\013receiver_id\030\002 \002(\005\022\016\n\006amount\030\003"
+  " \002(\002\"d\n\tmessage_t\022\021\n\tclient_id\030\001 \002(\005\022\037\n\t"
+  "timestamp\030\002 \002(\0132\014.timestamp_t\022#\n\013transac"
+  "tion\030\003 \002(\0132\016.transaction_t\"-\n\013timestamp_"
+  "t\022\017\n\007seconds\030\001 \002(\003\022\r\n\005nanos\030\002 \002(\005\"\031\n\treq"
+  "uest_t\022\014\n\004type\030\001 \002(\005"
   ;
 static const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable*const descriptor_table_Msg_2eproto_deps[1] = {
 };
@@ -170,7 +168,7 @@ static ::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase*const descriptor_table_Msg
 static ::PROTOBUF_NAMESPACE_ID::internal::once_flag descriptor_table_Msg_2eproto_once;
 static bool descriptor_table_Msg_2eproto_initialized = false;
 const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_Msg_2eproto = {
-  &descriptor_table_Msg_2eproto_initialized, descriptor_table_protodef_Msg_2eproto, "Msg.proto", 274,
+  &descriptor_table_Msg_2eproto_initialized, descriptor_table_protodef_Msg_2eproto, "Msg.proto", 260,
   &descriptor_table_Msg_2eproto_once, descriptor_table_Msg_2eproto_sccs, descriptor_table_Msg_2eproto_deps, 4, 0,
   schemas, file_default_instances, TableStruct_Msg_2eproto::offsets,
   file_level_metadata_Msg_2eproto, 4, file_level_enum_descriptors_Msg_2eproto, file_level_service_descriptors_Msg_2eproto,
@@ -186,17 +184,14 @@ void transaction_t::InitAsDefaultInstance() {
 class transaction_t::_Internal {
  public:
   using HasBits = decltype(std::declval<transaction_t>()._has_bits_);
-  static void set_has_type(HasBits* has_bits) {
+  static void set_has_sender_id(HasBits* has_bits) {
     (*has_bits)[0] |= 1u;
   }
-  static void set_has_sender_id(HasBits* has_bits) {
+  static void set_has_receiver_id(HasBits* has_bits) {
     (*has_bits)[0] |= 2u;
   }
-  static void set_has_receiver_id(HasBits* has_bits) {
-    (*has_bits)[0] |= 4u;
-  }
   static void set_has_amount(HasBits* has_bits) {
-    (*has_bits)[0] |= 8u;
+    (*has_bits)[0] |= 4u;
   }
 };
 
@@ -210,16 +205,16 @@ transaction_t::transaction_t(const transaction_t& from)
       _internal_metadata_(nullptr),
       _has_bits_(from._has_bits_) {
   _internal_metadata_.MergeFrom(from._internal_metadata_);
-  ::memcpy(&type_, &from.type_,
+  ::memcpy(&sender_id_, &from.sender_id_,
     static_cast<size_t>(reinterpret_cast<char*>(&amount_) -
-    reinterpret_cast<char*>(&type_)) + sizeof(amount_));
+    reinterpret_cast<char*>(&sender_id_)) + sizeof(amount_));
   // @@protoc_insertion_point(copy_constructor:transaction_t)
 }
 
 void transaction_t::SharedCtor() {
-  ::memset(&type_, 0, static_cast<size_t>(
+  ::memset(&sender_id_, 0, static_cast<size_t>(
       reinterpret_cast<char*>(&amount_) -
-      reinterpret_cast<char*>(&type_)) + sizeof(amount_));
+      reinterpret_cast<char*>(&sender_id_)) + sizeof(amount_));
 }
 
 transaction_t::~transaction_t() {
@@ -246,10 +241,10 @@ void transaction_t::Clear() {
   (void) cached_has_bits;
 
   cached_has_bits = _has_bits_[0];
-  if (cached_has_bits & 0x0000000fu) {
-    ::memset(&type_, 0, static_cast<size_t>(
+  if (cached_has_bits & 0x00000007u) {
+    ::memset(&sender_id_, 0, static_cast<size_t>(
         reinterpret_cast<char*>(&amount_) -
-        reinterpret_cast<char*>(&type_)) + sizeof(amount_));
+        reinterpret_cast<char*>(&sender_id_)) + sizeof(amount_));
   }
   _has_bits_.Clear();
   _internal_metadata_.Clear();
@@ -263,33 +258,25 @@ const char* transaction_t::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_
     ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
     CHK_(ptr);
     switch (tag >> 3) {
-      // required int32 type = 1;
+      // required int32 sender_id = 1;
       case 1:
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 8)) {
-          _Internal::set_has_type(&has_bits);
-          type_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint(&ptr);
-          CHK_(ptr);
-        } else goto handle_unusual;
-        continue;
-      // optional int32 sender_id = 2;
-      case 2:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 16)) {
           _Internal::set_has_sender_id(&has_bits);
           sender_id_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint(&ptr);
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
-      // optional int32 receiver_id = 3;
-      case 3:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 24)) {
+      // required int32 receiver_id = 2;
+      case 2:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 16)) {
           _Internal::set_has_receiver_id(&has_bits);
           receiver_id_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint(&ptr);
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
-      // optional float amount = 4;
-      case 4:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 37)) {
+      // required float amount = 3;
+      case 3:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 29)) {
           _Internal::set_has_amount(&has_bits);
           amount_ = ::PROTOBUF_NAMESPACE_ID::internal::UnalignedLoad<float>(ptr);
           ptr += sizeof(float);
@@ -323,28 +310,22 @@ failure:
   (void) cached_has_bits;
 
   cached_has_bits = _has_bits_[0];
-  // required int32 type = 1;
+  // required int32 sender_id = 1;
   if (cached_has_bits & 0x00000001u) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(1, this->_internal_type(), target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(1, this->_internal_sender_id(), target);
   }
 
-  // optional int32 sender_id = 2;
+  // required int32 receiver_id = 2;
   if (cached_has_bits & 0x00000002u) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(2, this->_internal_sender_id(), target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(2, this->_internal_receiver_id(), target);
   }
 
-  // optional int32 receiver_id = 3;
+  // required float amount = 3;
   if (cached_has_bits & 0x00000004u) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(3, this->_internal_receiver_id(), target);
-  }
-
-  // optional float amount = 4;
-  if (cached_has_bits & 0x00000008u) {
-    target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteFloatToArray(4, this->_internal_amount(), target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteFloatToArray(3, this->_internal_amount(), target);
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
@@ -355,42 +336,56 @@ failure:
   return target;
 }
 
+size_t transaction_t::RequiredFieldsByteSizeFallback() const {
+// @@protoc_insertion_point(required_fields_byte_size_fallback_start:transaction_t)
+  size_t total_size = 0;
+
+  if (_internal_has_sender_id()) {
+    // required int32 sender_id = 1;
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
+        this->_internal_sender_id());
+  }
+
+  if (_internal_has_receiver_id()) {
+    // required int32 receiver_id = 2;
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
+        this->_internal_receiver_id());
+  }
+
+  if (_internal_has_amount()) {
+    // required float amount = 3;
+    total_size += 1 + 4;
+  }
+
+  return total_size;
+}
 size_t transaction_t::ByteSizeLong() const {
 // @@protoc_insertion_point(message_byte_size_start:transaction_t)
   size_t total_size = 0;
 
-  // required int32 type = 1;
-  if (_internal_has_type()) {
+  if (((_has_bits_[0] & 0x00000007) ^ 0x00000007) == 0) {  // All required fields are present.
+    // required int32 sender_id = 1;
     total_size += 1 +
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
-        this->_internal_type());
+        this->_internal_sender_id());
+
+    // required int32 receiver_id = 2;
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
+        this->_internal_receiver_id());
+
+    // required float amount = 3;
+    total_size += 1 + 4;
+
+  } else {
+    total_size += RequiredFieldsByteSizeFallback();
   }
   ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  cached_has_bits = _has_bits_[0];
-  if (cached_has_bits & 0x0000000eu) {
-    // optional int32 sender_id = 2;
-    if (cached_has_bits & 0x00000002u) {
-      total_size += 1 +
-        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
-          this->_internal_sender_id());
-    }
-
-    // optional int32 receiver_id = 3;
-    if (cached_has_bits & 0x00000004u) {
-      total_size += 1 +
-        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
-          this->_internal_receiver_id());
-    }
-
-    // optional float amount = 4;
-    if (cached_has_bits & 0x00000008u) {
-      total_size += 1 + 4;
-    }
-
-  }
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
     return ::PROTOBUF_NAMESPACE_ID::internal::ComputeUnknownFieldsSize(
         _internal_metadata_, total_size, &_cached_size_);
@@ -423,17 +418,14 @@ void transaction_t::MergeFrom(const transaction_t& from) {
   (void) cached_has_bits;
 
   cached_has_bits = from._has_bits_[0];
-  if (cached_has_bits & 0x0000000fu) {
+  if (cached_has_bits & 0x00000007u) {
     if (cached_has_bits & 0x00000001u) {
-      type_ = from.type_;
-    }
-    if (cached_has_bits & 0x00000002u) {
       sender_id_ = from.sender_id_;
     }
-    if (cached_has_bits & 0x00000004u) {
+    if (cached_has_bits & 0x00000002u) {
       receiver_id_ = from.receiver_id_;
     }
-    if (cached_has_bits & 0x00000008u) {
+    if (cached_has_bits & 0x00000004u) {
       amount_ = from.amount_;
     }
     _has_bits_[0] |= cached_has_bits;
@@ -455,7 +447,7 @@ void transaction_t::CopyFrom(const transaction_t& from) {
 }
 
 bool transaction_t::IsInitialized() const {
-  if ((_has_bits_[0] & 0x00000001) != 0x00000001) return false;
+  if ((_has_bits_[0] & 0x00000007) != 0x00000007) return false;
   return true;
 }
 
@@ -463,7 +455,6 @@ void transaction_t::InternalSwap(transaction_t* other) {
   using std::swap;
   _internal_metadata_.Swap(&other->_internal_metadata_);
   swap(_has_bits_[0], other->_has_bits_[0]);
-  swap(type_, other->type_);
   swap(sender_id_, other->sender_id_);
   swap(receiver_id_, other->receiver_id_);
   swap(amount_, other->amount_);

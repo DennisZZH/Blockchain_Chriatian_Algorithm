@@ -51,8 +51,7 @@ private:
     void connect_to_server();       // function for establishing TCP connection to server
     void setup_peer_connection();   // function for seting up UDP connection with peer clients
 
-    void broadcast_msg(int type, timespec t);                               // Two kind of braodcast funtion
-    void broadcast_msg(int type, timespec t, int recv_id, int amt);         // One for broadcast balance transaction, one for transfer transaction
+    void broadcast_msg(int type, timespec& time, int recv_id, int amt);         // One for broadcast balance transaction, one for transfer transaction
 
     // Thread Tasks
     void simulate_time();           // Thread function for simulating time
