@@ -1,7 +1,7 @@
 #include "server.h"
+#include "Msg.pb.h"
+#include "parameters.h"
 
-#include <cstdlib>
-#include <iostream>
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/socket.h>
@@ -10,15 +10,16 @@
 #include <string.h>
 #include <netdb.h> 
 #include <errno.h>
-#include "Msg.pb.h"
 #include <sys/time.h>
+#include <pthread.h>
 
-#define REQUEST_TIME_TYPE 1
-#define REQUEST_STOP_TYPE 2
+int main() {
+    // Run server routine
+    // TODO
+    return 0;
+}
 
 server::server() {
-    server_ip = "127.0.0.1";
-    server_port = 8000;
     set_up_connection();
     run_time_server();
 }
@@ -44,7 +45,7 @@ int server::set_up_connection() {
         addresses[i].sin_family = AF_INET;
         addresses[i].sin_addr.s_addr = INADDR_ANY;
         addresses[i].sin_port = htons(server_port + 1 + i);
-        if (bind(server_sockets[i], (struct sockaddr *)(addresses + i), sizeof(addresses[i]))) {
+        if (bind(server_sockets[i], (struct sockaddr *)(addresses + i), sizeof(addresses[i])) < 0) {
             std::cerr << "Bind failed on " << i + 1 << " socket!\n";
             exit(0);
         }
@@ -64,7 +65,7 @@ int server::set_up_connection() {
     std::cout << "Connecting...";
     for (int i = 0; i < 3; i++) {
         addrlen[i] = sizeof(addresses[i]);
-        if ((client_socket[i] = accept(server_sockets[i], (struct sockaddr *)(addresses + i), (socklen_t *)(addrlen + 1))) < 0) {
+        if ((client_sockets[i] = accept(server_sockets[i], (struct sockaddr *)(addresses + i), (socklen_t *)(addrlen + 1))) < 0) {
             std::cerr << "Failed accepting process " << i + 1 << "\n";
             printf("Error number: %d\n", errno);
             printf("The error message is %s\n", strerror(errno));
@@ -77,11 +78,12 @@ int server::set_up_connection() {
     return 0;
 }
 
-void* server::manage_clients(void* args) {
+void* manage_clients(void* args) {
      // Manage clients' requests using this function
     // args: 1. client id  2. sockfd: the listening socket for the corresponding process
-    int cid = *(int*)args;
-    int cur_sockfd = client_sockets[cid];
+    argu_t* argu = (argu_t*) args;
+    int cid = argu->cid;
+    int cur_sockfd = argu->sockfd;
     struct timeval timestamp;
     timestamp_t timestamp_msg;
 
@@ -110,15 +112,15 @@ void* server::manage_clients(void* args) {
         }
 
         // Send out the timestamp to client
-        std::cout << "Waiting to send the message from server to client" << m.client_id() << "......"<<std::endl;
+        std::cout << "Waiting to send the message from server to client" << cid << "......"<<std::endl;
             
         gettimeofday(&timestamp, NULL);
         timestamp_msg.set_seconds(timestamp.tv_sec);
         timestamp_msg.set_nanos(timestamp.tv_usec);
-        strMessage = timestamp_msg.SerializedAsString();
+        strMessage = timestamp_msg.SerializeAsString();
         
         int send_size = 0;
-        if ((send_size = send(curr_sockfd, strMessage.c_str(), sizeof(timestamp_t), 0)) < 0) {
+        if ((send_size = send(cur_sockfd, strMessage.c_str(), sizeof(timestamp_t), 0)) < 0) {
             std::cerr << "Failed\n";
             exit(0);
         }
@@ -132,15 +134,17 @@ void* server::manage_clients(void* args) {
 int server::run_time_server() {
    
     // Create two extra threads to handle messages from client 2 and 3
-    int cids[3];
+    argu_t argus[3];
     for (int i = 1; i < 3; i++) {
-        cids[i] = i + 1;
-        pthread_create(tids + i - 1, NULL, manage_clients, (void*)(cids + i));
+        argus[i].cid = i + 1;
+        argus[i].sockfd = client_sockets[i];
+        pthread_create(tids + i - 1, NULL, manage_clients, (void*)(argus + i));
     }
 
     // Call function for main thread
-    cids[0] = 1;
-    manage_clients((void*)(cids));
+    argus[0].cid = 1;
+    argus[0].sockfd = client_sockets[0];
+    manage_clients((void*)(argus));
 
     std::cout << "The time server to clients connection is up!\n";
 

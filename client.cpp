@@ -1,8 +1,9 @@
-#include <thread>
+#include "client.h"
+#include "utility.h"
+#include "parameters.h"
+#include "Msg.pb.h"
+
 #include <chrono>
-#include <time.h>
-#include <cstdlib>
-#include <iostream>
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/socket.h>
@@ -12,14 +13,7 @@
 #include <netdb.h> 
 #include <errno.h>
 #include <sys/time.h>
-
-#include "client.h"
-#include "utility.h"
-#include "parameters.h"
-#include "Msg.pb.h"
-
-#define BALANCE_TRANSACTION_TYPE 1
-#define TRANSFER_TRANSACTION_TYPE 2
+#include <thread>
 
 int main(int argc, char* argv[]) {
     timespec t0, t1;
@@ -46,13 +40,13 @@ client::client(int cid) {
     setup_peer_connection();
 
     // Spawn a Thread for continously receiving from peer clients
-    receive_msg_thread = thread(&client::receive_msg, this);
+    receive_msg_thread = std::thread(&client::receive_msg, this);
 
     // Spawn a Thread for simulating time
     // Initialize time
     simulated_time.set_nanos(0);
     simulated_time.set_seconds(0);
-    simulate_time_thread = thread(&client::simulate_time, this); 
+    simulate_time_thread = std::thread(&client::simulate_time, this); 
 }
 
 client::~client() {
@@ -231,11 +225,7 @@ void client::connect_to_server() {
         printf("Socket creation failed.\n");
         exit(0);
     }
-
-    // TODO
-    // server ip better moved to utility file, for now it is hard coded here
-    char* server_ip = "127.0.0.1";
-
+    const char* server_ip = "127.0.0.1";
     server_address.sin_family = AF_INET;
     server_address.sin_addr.s_addr = inet_addr(server_ip);
     server_address.sin_port = htons(port_id_TCP);
@@ -262,11 +252,8 @@ void client::setup_peer_connection() {
     struct sockaddr_in servaddr;
     memset(&servaddr, 0, sizeof(servaddr));
 
-    // TODO
-    // server ip better moved to utility file, for now it is hard coded here
-    char* server_ip = "127.0.0.1";
-
     // Filling server information
+    const char* server_ip = "127.0.0.1";
     servaddr.sin_family = AF_INET;
     servaddr.sin_port = htons(port_id_UDP);
     servaddr.sin_addr.s_addr = inet_addr(server_ip);
@@ -313,48 +300,11 @@ void client::receive_msg() {
     }
 }
 
-void client::broadcast_msg(int type, timespec& time, int recv_id, int amt) {
-    // Prepare message
-    transaction_t t;
-    t.set_type(type);
-    t.set_sender_id(client_id);
-    t.set_receiver_id(recv_id);
-    t.set_amount(amt);
-    message_t m;
-    m.set_client_id(client_id);
-    m.set_timestamp(time);
-    // need to transalate timespec to timestamp_t
-    m.set_transaction(t);
-    std::string str_msg = m.SerializeAsString();
+void tcp_send(int type) {
 
-    // Figure out peer port number
-    int peer_port1 = 8020, peer_port2 = 8020;
-    if (client_id == 1) {
-        peer_port1 += 2;
-        peer_port2 += 3;
-    }
-    else if (client_id == 2) {
-        peer_port1 += 1;
-        peer_port2 += 3;
-    }
-    else {
-        peer_port1 += 1;
-        peer_port2 += 2;
-    }
+}
 
-    // TODO
-    // server ip better moved to utility file, for now it is hard coded here
-    char* server_ip = "127.0.0.1";
+void udp_send(int cid, timespec& time, int recv_id, float amt) {
     
-    // Filling peer information and send
-    struct sockaddr_in peeraddr;
-    memset(&peeraddr, 0, sizeof(peeraddr)); 
-    peeraddr.sin_family = AF_INET; 
-    peeraddr.sin_addr.s_addr = inet_addr(server_ip); 
-    
-    peeraddr.sin_port = htons(peer_port1); 
-    sendto(sockfd_UDP, str_msg.c_str(), sizeof(message_t), 0, (const sockaddr *)&peeraddr, sizeof(peeraddr));
+}
 
-    peeraddr.sin_port = htons(peer_port2); 
-    sendto(sockfd_UDP, str_msg.c_str(), sizeof(message_t), 0, (const sockaddr *)&peeraddr, sizeof(peeraddr));
-} 

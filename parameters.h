@@ -23,3 +23,18 @@
  * 
  */
 #define COMM_DELAY_MAX      5
+
+/**
+ * @brief The type of client's request to server
+ * Type 1 for request time
+ * Type 2 for stop connection
+ * 
+ */
+#define REQUEST_TIME_TYPE 1
+#define REQUEST_STOP_TYPE 2
+
+
+/**
+ * @brief The ip address of server.
+ * 
+ */

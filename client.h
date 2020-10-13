@@ -5,12 +5,9 @@
 #include <iostream>
 #include <list>
 #include <deque>
-
 #include <time.h>
 #include <thread>
 #include "Msg.pb.h"
-
-using namespace std;
 
 // struct trans_t {
 //     uint32_t sender_id;
@@ -35,12 +32,12 @@ private:
     int sockfd_TCP;                 // TCP socket connection to time server
     int sockfd_UDP;                 // UDP socket for peer clients communication
 
-    deque<message_t> message_buffer;
-    list<transaction_t> blockchain;
+    std::deque<message_t> message_buffer;
+    std::list<transaction_t> blockchain;
     
     bool stop_flag = false;         // We need a flag to stop the loop in other threads.
-    thread simulate_time_thread;
-    thread receive_msg_thread;      // A thread for continously receiving msg from peer clients
+    std::thread simulate_time_thread;
+    std::thread receive_msg_thread;      // A thread for continously receiving msg from peer clients
 
     // Private method
     void get_simulated_time(timespec& result);
@@ -51,7 +48,8 @@ private:
     void connect_to_server();       // function for establishing TCP connection to server
     void setup_peer_connection();   // function for seting up UDP connection with peer clients
 
-    void broadcast_msg(int type, timespec& time, int recv_id, int amt);         // One for broadcast balance transaction, one for transfer transaction
+    void tcp_send(int type);
+    void udp_send(int cid, timespec& time, int recv_id, float amt);
 
     // Thread Tasks
     void simulate_time();           // Thread function for simulating time
