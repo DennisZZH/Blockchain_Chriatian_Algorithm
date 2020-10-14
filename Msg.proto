@@ -7,8 +7,8 @@ message transaction_t {
 }
 		
 message	message_t {
-	required timestamp_t timestamp = 1;
-	required int32 client_id = 2;
+	required int32 client_id = 1;
+	required timestamp_t timestamp = 2;
 	required transaction_t transaction = 3;
 }
 
