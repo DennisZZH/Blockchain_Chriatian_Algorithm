@@ -16,16 +16,32 @@
 #include <thread>
 
 int main(int argc, char* argv[]) {
-    timespec t0, t1;
+    timespec t0, t1, diff, div;
     clock_gettime(CLOCK_REALTIME, &t0);
     while(true) {
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
         clock_gettime(CLOCK_REALTIME, &t1);
-        std::cout << "t0: " << t0.tv_sec << " " << t0.tv_nsec << "t1: " << t1.tv_sec << " " << t1.tv_nsec << std::endl;
-        std::cout << "Increment: " << get_dt_nanosec(t0, t1) << std::endl;
-        memcpy(&t0, &t1, sizeof(t1));
+        get_dt(t0, t1, diff);
+        // std::cout << "t0: " << t0.tv_sec << " " << t0.tv_nsec << "t1: " << t1.tv_sec << " " << t1.tv_nsec << std::endl;
+        std::cout << "Old Nano: " << t0.tv_nsec << std::endl;
+        std::cout << "New Nano: " << t1.tv_nsec << std::endl;
+        std::cout << "Increment: " << diff.tv_sec << "s " << diff.tv_nsec/1000000 << "ms " << std::endl;
+        divide_time(diff, 2, div);
+        std::cout << "Div: " << div.tv_sec << "s " << div.tv_nsec / 1000000 << "ms " << std::endl;
+        get_dt(t1, t0, diff);
+        std::cout << "Increment: " << diff.tv_sec << "s " << diff.tv_nsec/1000000 << "ms " << std::endl;
+        std::cout << std::endl;
+        // memcpy(&t0, &t1, sizeof(t1));
     }
     return 0;
+}
+
+void boardcast() {
+    // loop:
+    //  int port;
+    //  address.ip = ""
+    //  address.port = port;
+    // sendto
 }
 
 client::client(int cid) {
@@ -107,11 +123,20 @@ int client::balance_transaction() {
         msg_index ++; 
     }
     // Need to pop out the message. (Currently, the msg_index is pointing to the first message later than the balance_timestamp).
-    message_buffer.erase(message_buffer.begin(), message_buffer.begin() + msg_index);
+    while(msg_index) {
+        //message_buffer.erase(message_buffer.begin(), message_buffer.begin() + msg_index);
+        message_buffer.pop_front();
+        msg_index --;
+    }
     return 0;
 }
     
 int client::transfer_transaction(int sid, int rid, float amt) {
+    // a
+    // b
+    // udp_send_t* task = new 
+    // task->start_time = get_clocktime();
+    // task->delay_seconds = ceil(rand() * 5);
     return 0;
 }
 
@@ -119,13 +144,14 @@ int client::transfer_transaction(int sid, int rid, float amt) {
 void client::sync_server_time(timespec& time) {
     timespec t0, t1;
     clock_gettime(CLOCK_REALTIME, &t0);
-    // TODO: Wait for random time.
+    // Wait for random time to simulate the communication delay.
+    std::this_thread::sleep_for(std::chrono::seconds(random_uint32(COMM_DELAY_MAX)));
 
     // Send request to server
-    request_t r;
+    request_t request;
     std::string msg_str;
-    r.set_type(1);
-    r.SerializeToString(&msg_str);
+    request.set_type(REQUEST_TIME_TYPE);
+    request.SerializeToString(&msg_str);
     if(send(sockfd_TCP, msg_str.c_str(), sizeof(request_t), 0) < 0){
         std::cerr<<"Error: Failed to send out the request to time server!"<<std::endl;
         exit(0);
@@ -149,7 +175,29 @@ void client::sync_server_time(timespec& time) {
     t.ParseFromString(msg_str);
 
     clock_gettime(CLOCK_REALTIME, &t1);
-    // TODO: Assign the new value based on christian's algorithm.
+    
+    // REVIEW: Assign the new value based on christian's algorithm.
+    timespec sync_timestamp = {0}, local_timestamp = {0};
+    // Calculate half trip time
+    timespec delta_time = {0};
+    get_dt(t0, t1, delta_time);
+    divide_time(delta_time, 2, delta_time);
+
+    // Christian Algorithm
+    sync_timestamp.tv_sec = t.seconds();
+    sync_timestamp.tv_nsec = t.nanos();
+    increase_time(sync_timestamp, delta_time);
+
+
+    // Implement slow down speed up algorithm.
+    get_simulated_time(local_timestamp);
+    if (compare_time(local_timestamp, sync_timestamp) > 0) { // Local time is faster
+        timespec diff = {0};
+        get_dt(sync_timestamp, local_timestamp, diff);
+        std::this_thread::sleep_for(std::chrono::nanoseconds(diff.tv_nsec));
+        std::this_thread::sleep_for(std::chrono::seconds(diff.tv_sec));
+    }
+    set_simulated_time(sync_timestamp);
 }
 
 void client::get_simulated_time(timespec& result) {
@@ -185,14 +233,17 @@ void client::simulate_time() {   // REVIEW: Need to verify this function.
         clock_gettime(CLOCK_REALTIME, &curr_systime);
         // Check if the time difference has passed the update threshold for simulation time.
         if (get_dt_nanosec(prev_systime, curr_systime) > TIMESTEP_NANOSEC) {
-            uint64_t dt_ns = get_dt_nanosec(prev_systime, curr_systime);
-            increase_time(local_time, (uint64_t)(dt_ns * (1 + TIME_DRIFT_FACTOR)));
+            timespec dt = {0};
+            // uint64_t dt_ns = get_dt_nanosec(prev_systime, curr_systime);
+            get_dt(prev_systime, curr_systime, dt);
+            scale_time(dt, (1 + TIME_DRIFT_FACTOR), dt);
+            increase_time(local_time, dt);
             set_simulated_time(local_time);
             memcpy(&prev_systime, &curr_systime, sizeof(curr_systime));
         }
 
         // Check if the time difference between clients pass the max tolerable drift.
-        if (get_dt_nanosec(last_synctime, curr_systime) >= TIME_DIFF_TOLERANCE / (2 * TIME_DRIFT_FACTOR)) {
+        if (get_dt_sec(last_synctime, curr_systime) >= TIME_DIFF_TOLERANCE / (2 * TIME_DRIFT_FACTOR)) {
             sync_server_time(local_time);
             clock_gettime(CLOCK_REALTIME, &curr_systime);
             set_simulated_time(local_time);
@@ -291,11 +342,38 @@ void client::receive_msg() {
     }
 }
 
-void tcp_send(int type) {
+void client::transfer_msg() {
+    // Note: This function only transfers the udp message.
+    while (!stop_flag) {
+        if (udp_send_queue.size() == 0)
+            continue;
+        udp_send_t* send_task = udp_send_queue[0];
+        timespec curr_time;
+        clock_gettime(CLOCK_REALTIME, &curr_time);
+        uint64_t diff_in_sec = get_dt_sec(send_task->start_time, curr_time);
+        
+        // If the passed time is smaller than the delay time, then we should wait.
+        if(diff_in_sec < send_task->delay_seconds) {
+            std::this_thread::sleep_for(std::chrono::seconds(diff_in_sec));
+            continue;
+        }
 
-}
-
-void udp_send(int cid, timespec& time, int recv_id, float amt) {
+        // REVIEW: May need to deal to verify the udp fd.
+        // call send to other clients
+        // - send c2 c3
+        // - send c1 c3
+        
+        // make message
+        
+    }
     
+    // Free of the dynamic memory before quit.
+    while (udp_send_queue.size() > 0) {
+        udp_send_t* send_task = udp_send_queue[0];
+        udp_send_queue.pop_front();
+        delete send_task;
+    }
 }
+
+
 

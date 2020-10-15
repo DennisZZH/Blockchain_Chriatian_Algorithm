@@ -9,11 +9,19 @@
 #include <thread>
 #include "Msg.pb.h"
 
-// struct trans_t {
-//     uint32_t sender_id;
-//     uint32_t receiver_id;
-//     float amount;
-// };
+typedef struct {
+    uint32_t delay_seconds;
+    timespec start_time;            // Note this should be the real world time because we are simulating the delay.
+    message_t message;
+} udp_send_t;
+
+// [] [C][B][A] >>>>>> []
+// [5] [1] [3] [2]
+//  ^
+// [A] [B] [C] 
+//  [C]>>[B]>>[A] >>>>>>>>>>>>>>>>>> target
+
+// current_time - start_time > delay_seconds:
 
 class client{
 public:
@@ -32,6 +40,7 @@ private:
     int sockfd_TCP;                 // TCP socket connection to time server
     int sockfd_UDP;                 // UDP socket for peer clients communication
 
+    std::deque<udp_send_t*> udp_send_queue;   // This queue is used to hold the dynamic allocated send tasks.
     std::deque<message_t> message_buffer;
     std::list<transaction_t> blockchain;
     
@@ -47,12 +56,14 @@ private:
     void connect_to_server();       // function for establishing TCP connection to server
     void setup_peer_connection();   // function for seting up UDP connection with peer clients
 
-    void tcp_send(int type);
-    void udp_send(int cid, timespec& time, int recv_id, float amt);
+    void broadcast(message_t& message);
+    // void tcp_send(int type);
+    // void udp_send(int cid, timespec& time, int recv_id, float amt);
 
     // Thread Tasks
     void simulate_time();           // Thread function for simulating time
     void receive_msg();             // Thread function for continously receiving msg from peer clients 
+    void transfer_msg();            // Thread function for sending the udp requests in the queue.
 };
 
 #endif
