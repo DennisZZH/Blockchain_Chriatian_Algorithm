@@ -58,6 +58,7 @@ int main(int argc, char* argv[]) {
 }
 
 void client::broadcast(message_t& message) {
+    std::string msg_string = message.SerializeAsString();
     for (int cid = 0; cid < 3; cid++) {
         if (cid == this->client_id)
             continue;
@@ -65,7 +66,7 @@ void client::broadcast(message_t& message) {
         client_addr.sin_family = AF_INET;
         client_addr.sin_addr.s_addr = inet_addr(CLIENT_IP);
         client_addr.sin_port = htons(UDP_BASE_PORT + cid);
-        size_t bytes_count = sendto(sockfd_UDP, &message, sizeof(message), 0, (sockaddr*)&client_addr, sizeof(client_addr));
+        size_t bytes_count = sendto(sockfd_UDP, msg_string.c_str(), msg_string.size(), 0, (sockaddr*)&client_addr, sizeof(client_addr));
         if (bytes_count < sizeof(message)) {
             printf("Send message to process id: %d failed. Send %ld out of %ld bytes", cid, bytes_count, sizeof(message));
         }
@@ -426,36 +427,36 @@ void client::transfer_msg() {
     }
 }
 
-void client::broadcast(message_t& message) {
-     // Figure out peer port number
-    std::string str_msg = message.SerializeAsString();
+// void client::broadcast(message_t& message) {
+//      // Figure out peer port number
+//     std::string str_msg = message.SerializeAsString();
 
-    int peer_port1 = 8020, peer_port2 = 8020;
-    if (client_id == 1) {
-        peer_port1 += 2;
-        peer_port2 += 3;
-    }
-    else if (client_id == 2) {
-        peer_port1 += 1;
-        peer_port2 += 3;
-    }
-    else {
-        peer_port1 += 1;
-        peer_port2 += 2;
-    }
+//     int peer_port1 = 8020, peer_port2 = 8020;
+//     if (client_id == 1) {
+//         peer_port1 += 2;
+//         peer_port2 += 3;
+//     }
+//     else if (client_id == 2) {
+//         peer_port1 += 1;
+//         peer_port2 += 3;
+//     }
+//     else {
+//         peer_port1 += 1;
+//         peer_port2 += 2;
+//     }
 
-    char* server_ip = "127.0.0.1";
+//     char* server_ip = "127.0.0.1";
 
-    // Filling peer information and send
-    struct sockaddr_in peeraddr;
-    memset(&peeraddr, 0, sizeof(peeraddr)); 
-    peeraddr.sin_family = AF_INET; 
-    peeraddr.sin_addr.s_addr = inet_addr(server_ip); 
+//     // Filling peer information and send
+//     struct sockaddr_in peeraddr;
+//     memset(&peeraddr, 0, sizeof(peeraddr)); 
+//     peeraddr.sin_family = AF_INET; 
+//     peeraddr.sin_addr.s_addr = inet_addr(server_ip); 
 
-    // Send out message to peers
-    peeraddr.sin_port = htons(peer_port1); 
-    sendto(sockfd_UDP, str_msg.c_str(), sizeof(message_t), 0, (const sockaddr *)&peeraddr, sizeof(peeraddr));
+//     // Send out message to peers
+//     peeraddr.sin_port = htons(peer_port1); 
+//     sendto(sockfd_UDP, str_msg.c_str(), sizeof(message_t), 0, (const sockaddr *)&peeraddr, sizeof(peeraddr));
 
-    peeraddr.sin_port = htons(peer_port2); 
-    sendto(sockfd_UDP, str_msg.c_str(), sizeof(message_t), 0, (const sockaddr *)&peeraddr, sizeof(peeraddr));
-}
+//     peeraddr.sin_port = htons(peer_port2); 
+//     sendto(sockfd_UDP, str_msg.c_str(), sizeof(message_t), 0, (const sockaddr *)&peeraddr, sizeof(peeraddr));
+// }
