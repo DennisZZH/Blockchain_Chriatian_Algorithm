@@ -36,18 +36,25 @@ int main(int argc, char* argv[]) {
     return 0;
 }
 
-void boardcast() {
-    // loop:
-    //  int port;
-    //  address.ip = ""
-    //  address.port = port;
-    // sendto
+void client::broadcast(message_t& message) {
+    for (int cid = 0; cid < 3; cid++) {
+        if (cid == this->client_id)
+            continue;
+        sockaddr_in client_addr = {0};
+        client_addr.sin_family = AF_INET;
+        client_addr.sin_addr.s_addr = inet_addr(CLIENT_IP);
+        client_addr.sin_port = htons(UDP_BASE_PORT + cid);
+        size_t bytes_count = sendto(sockfd_UDP, &message, sizeof(message), 0, (sockaddr*)&client_addr, sizeof(client_addr));
+        if (bytes_count < sizeof(message)) {
+            printf("Send message to process id: %d failed. Send %ld out of %ld bytes", cid, bytes_count, sizeof(message));
+        }
+    }
 }
 
 client::client(int cid) {
     client_id = cid;
-    port_id_TCP = 8010 + cid;
-    port_id_UDP = 8020 + cid;
+    port_id_TCP = TCP_BASE_PORT + cid;
+    port_id_UDP = UDP_BASE_PORT + cid;
 
     // Establish TCP connection to the Time Server
     connect_to_server();
@@ -267,9 +274,9 @@ void client::connect_to_server() {
         printf("Socket creation failed.\n");
         exit(0);
     }
-    const char* server_ip = "127.0.0.1";
+
     server_address.sin_family = AF_INET;
-    server_address.sin_addr.s_addr = inet_addr(server_ip);
+    server_address.sin_addr.s_addr = inet_addr(SERVER_IP);
     server_address.sin_port = htons(port_id_TCP);
 
     if (connect(sockfd_TCP, (struct sockaddr*)&server_address, sizeof(server_address)) != 0) {
@@ -295,10 +302,9 @@ void client::setup_peer_connection() {
     memset(&servaddr, 0, sizeof(servaddr));
 
     // Filling server information
-    const char* server_ip = "127.0.0.1";
     servaddr.sin_family = AF_INET;
     servaddr.sin_port = htons(port_id_UDP);
-    servaddr.sin_addr.s_addr = inet_addr(server_ip);
+    servaddr.sin_addr.s_addr = inet_addr(CLIENT_IP);
 
     // Bind the socket
     if (bind(sockfd_UDP, (const struct sockaddr *)&servaddr, sizeof(servaddr)) < 0)
@@ -357,14 +363,13 @@ void client::transfer_msg() {
             std::this_thread::sleep_for(std::chrono::seconds(diff_in_sec));
             continue;
         }
-
-        // REVIEW: May need to deal to verify the udp fd.
-        // call send to other clients
-        // - send c2 c3
-        // - send c1 c3
         
         // make message
-        
+        broadcast(send_task->message);
+
+        // After the current message is sent successfully, pop the front.
+        udp_send_queue.pop_front();
+        delete send_task;
     }
     
     // Free of the dynamic memory before quit.

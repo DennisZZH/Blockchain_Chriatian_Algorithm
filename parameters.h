@@ -1,6 +1,7 @@
 #pragma once
 
 
+
 #define SEC_IN_NANOSEC      1000000000
 
 /**
@@ -35,6 +36,10 @@
 
 
 /**
- * @brief The ip address of server.
- * 
+ *  Communication related parameters
  */
+#define SERVER_IP           "127.0.0.1"
+#define CLIENT_IP           "127.0.0.1"
+#define UDP_BASE_PORT       8020
+#define TCP_BASE_PORT       8010
+
