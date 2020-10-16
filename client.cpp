@@ -131,7 +131,14 @@ int client::balance_transaction() {
     std::this_thread::sleep_for(std::chrono::seconds(COMM_DELAY_MAX));
 
     // Sort the message buffer based on the following comparator function.
+    // If this function returns true, it means m1 < m2.
     auto comparator = [](message_t &m1, message_t &m2) {
+        // Deal with the case where timestamps are exactly same first. Use the pid to break the tie.
+        if (m1.timestamp().seconds() == m2.timestamp().seconds() && m1.timestamp().nanos() == m2.timestamp().nanos()) {
+            return m1.transaction().sender_id() < m2.transaction().sender_id();
+        }
+        
+        // if the two messages's timestamps are not the same, then compare their time stamps.
         if (m1.timestamp().seconds() == m2.timestamp().seconds())
             return m1.timestamp().nanos() < m2.timestamp().nanos();
         else
