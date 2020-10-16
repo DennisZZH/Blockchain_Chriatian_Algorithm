@@ -44,9 +44,10 @@ private:
     std::deque<message_t> message_buffer;
     std::list<transaction_t> blockchain;
     
-    bool stop_flag = false;         // We need a flag to stop the loop in other threads.
+    bool stop_flag = false;              // We need a flag to stop the loop in other threads.
     std::thread simulate_time_thread;
     std::thread receive_msg_thread;      // A thread for continously receiving msg from peer clients
+    std::thread transfer_msg_thread;     // A thread for continously checking udp_send_queue and send
 
     // Private method
     void get_simulated_time(timespec& result);
