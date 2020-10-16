@@ -35,6 +35,8 @@
 
 
 /**
- * @brief The ip address of server.
- * 
+ * @Insufficient balance error flag.
+ * Client throw this flag when user trying to send an amt greater than its balance
  */
+#define INSUFFICIENT_BALANCE_ERROR  -1
+#define ILLEGAL_SENDER_ERROR -2
