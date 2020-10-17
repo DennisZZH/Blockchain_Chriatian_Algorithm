@@ -30,6 +30,7 @@ public:
     float get_balance();
     int balance_transaction();
     int transfer_transaction(int sid, int rid, float amt);
+    std::string serialize_transaction();    // A function that prints the block chain for debugging.
     
 private:
     std::mutex simulated_time_mutex;
