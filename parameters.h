@@ -43,3 +43,8 @@
 #define UDP_BASE_PORT       8020
 #define TCP_BASE_PORT       8010
 
+/** @Insufficient balance error flag.
+* Client throw this flag when user trying to send an amt greater than its balance
+*/
+#define INSUFFICIENT_BALANCE_ERROR  -1
+#define ILLEGAL_SENDER_ERROR -2

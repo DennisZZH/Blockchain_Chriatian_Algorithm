@@ -58,6 +58,7 @@ int main(int argc, char* argv[]) {
 }
 
 void client::broadcast(message_t& message) {
+    std::string msg_string = message.SerializeAsString();
     for (int cid = 0; cid < 3; cid++) {
         if (cid == this->client_id)
             continue;
@@ -65,7 +66,7 @@ void client::broadcast(message_t& message) {
         client_addr.sin_family = AF_INET;
         client_addr.sin_addr.s_addr = inet_addr(CLIENT_IP);
         client_addr.sin_port = htons(UDP_BASE_PORT + cid);
-        size_t bytes_count = sendto(sockfd_UDP, &message, sizeof(message), 0, (sockaddr*)&client_addr, sizeof(client_addr));
+        size_t bytes_count = sendto(sockfd_UDP, msg_string.c_str(), msg_string.size(), 0, (sockaddr*)&client_addr, sizeof(client_addr));
         if (bytes_count < sizeof(message)) {
             printf("Send message to process id: %d failed. Send %ld out of %ld bytes", cid, bytes_count, sizeof(message));
         }
@@ -85,6 +86,9 @@ client::client(int cid) {
 
     // Spawn a Thread for continously receiving from peer clients
     receive_msg_thread = std::thread(&client::receive_msg, this);
+
+    // Spawn a Thread for continously checking udp_send_queue and send
+    transfer_msg_thread = std::thread(&client::transfer_msg, this);
 
     // Spawn a Thread for simulating time
     // Initialize time
@@ -127,7 +131,14 @@ int client::balance_transaction() {
     std::this_thread::sleep_for(std::chrono::seconds(COMM_DELAY_MAX));
 
     // Sort the message buffer based on the following comparator function.
+    // If this function returns true, it means m1 < m2.
     auto comparator = [](message_t &m1, message_t &m2) {
+        // Deal with the case where timestamps are exactly same first. Use the pid to break the tie.
+        if (m1.timestamp().seconds() == m2.timestamp().seconds() && m1.timestamp().nanos() == m2.timestamp().nanos()) {
+            return m1.transaction().sender_id() < m2.transaction().sender_id();
+        }
+        
+        // if the two messages's timestamps are not the same, then compare their time stamps.
         if (m1.timestamp().seconds() == m2.timestamp().seconds())
             return m1.timestamp().nanos() < m2.timestamp().nanos();
         else
@@ -160,11 +171,33 @@ int client::balance_transaction() {
 }
     
 int client::transfer_transaction(int sid, int rid, float amt) {
-    // a
-    // b
-    // udp_send_t* task = new 
-    // task->start_time = get_clocktime();
-    // task->delay_seconds = ceil(rand() * 5);
+    // Check current balance
+    if (get_balance() < amt) return INSUFFICIENT_BALANCE_ERROR;
+    // Check ensure client can only send its own money, ie. sid = client_id
+    if (sid != client_id) return ILLEGAL_SENDER_ERROR;
+    // Prepare send task
+    udp_send_t* task = new udp_send_t();
+    timespec start_time = {0};
+    message_t message;
+    transaction_t transaction;
+    timestamp_t timestamp;
+
+    get_simulated_time(start_time);
+    timestamp.set_seconds(start_time.tv_sec);
+    timestamp.set_nanos(start_time.tv_nsec);
+    transaction.set_sender_id(sid);
+    transaction.set_receiver_id(rid);
+    transaction.set_amount(amt);
+    message.set_client_id(client_id);
+    message.set_allocated_timestamp(&timestamp);
+    message.set_allocated_transaction(&transaction);
+
+    task->start_time = start_time;
+    task->delay_seconds = random_uint32(COMM_DELAY_MAX);
+    task->message = message;
+    // Add message to send queue
+    udp_send_queue.push_back(task);
+
     return 0;
 }
 
@@ -385,12 +418,12 @@ void client::transfer_msg() {
             continue;
         }
         
-        // make message
         broadcast(send_task->message);
-
-        // After the current message is sent successfully, pop the front.
-        udp_send_queue.pop_front();
         delete send_task;
+
+        // CAUTION: we might need to delete here, rather than after quit!
+        udp_send_queue.pop_front();
+        
     }
     
     // Free of the dynamic memory before quit.
@@ -401,5 +434,36 @@ void client::transfer_msg() {
     }
 }
 
+// void client::broadcast(message_t& message) {
+//      // Figure out peer port number
+//     std::string str_msg = message.SerializeAsString();
 
+//     int peer_port1 = 8020, peer_port2 = 8020;
+//     if (client_id == 1) {
+//         peer_port1 += 2;
+//         peer_port2 += 3;
+//     }
+//     else if (client_id == 2) {
+//         peer_port1 += 1;
+//         peer_port2 += 3;
+//     }
+//     else {
+//         peer_port1 += 1;
+//         peer_port2 += 2;
+//     }
 
+//     char* server_ip = "127.0.0.1";
+
+//     // Filling peer information and send
+//     struct sockaddr_in peeraddr;
+//     memset(&peeraddr, 0, sizeof(peeraddr)); 
+//     peeraddr.sin_family = AF_INET; 
+//     peeraddr.sin_addr.s_addr = inet_addr(server_ip); 
+
+//     // Send out message to peers
+//     peeraddr.sin_port = htons(peer_port1); 
+//     sendto(sockfd_UDP, str_msg.c_str(), sizeof(message_t), 0, (const sockaddr *)&peeraddr, sizeof(peeraddr));
+
+//     peeraddr.sin_port = htons(peer_port2); 
+//     sendto(sockfd_UDP, str_msg.c_str(), sizeof(message_t), 0, (const sockaddr *)&peeraddr, sizeof(peeraddr));
+// }
