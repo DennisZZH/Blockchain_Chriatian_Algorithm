@@ -261,13 +261,15 @@ int client::transfer_transaction(int sid, int rid, float amt) {
     // Prepare send task
     udp_send_t* task = new udp_send_t();
     timespec start_time = {0};
+    timespec simulated_time = {0}; 
 
     timestamp_t *timestamp = new timestamp_t();
     transaction_t *transaction = new transaction_t();
 
-    get_simulated_time(start_time);
-    timestamp->set_seconds(start_time.tv_sec);
-    timestamp->set_nanos(start_time.tv_nsec);
+    clock_gettime(CLOCK_REALTIME, &start_time);
+    get_simulated_time(simulated_time);
+    timestamp->set_seconds(simulated_time.tv_sec);
+    timestamp->set_nanos(simulated_time.tv_nsec);
     transaction->set_sender_id(sid);
     transaction->set_receiver_id(rid);
     transaction->set_amount(amt);
@@ -281,6 +283,7 @@ int client::transfer_transaction(int sid, int rid, float amt) {
     task->message.set_client_id(client_id);
     task->message.set_allocated_timestamp(timestamp);
     task->message.set_allocated_transaction(transaction);
+    
 
     // Add message to send queue
     udp_send_queue.push_back(task);
@@ -501,7 +504,7 @@ void client::receive_msg() {
     std::string str_message;
     message_t m;
     uint64_t buff_size = calc_message_size();
-    std::cout << "Buffer size: " << buff_size << std::endl;
+    std::cout << "To receive size: " << buff_size << std::endl;
     char buf[buff_size + 1];
     struct sockaddr_in recvaddr;
     memset(&recvaddr, 0, sizeof(recvaddr));
@@ -509,9 +512,9 @@ void client::receive_msg() {
     {
         m.Clear();
         bzero(buf, sizeof(buf));
-        bzero(&str_message, sizeof(str_message));
+        str_message.clear();
         int len = sizeof(recvaddr);
-        read_size = recvfrom(sockfd_UDP, buf, sizeof(buf), MSG_WAITALL, (struct sockaddr *)&recvaddr, (socklen_t *)&len);
+        read_size = recvfrom(sockfd_UDP, buf, buff_size, MSG_WAITALL, (struct sockaddr *)&recvaddr, (socklen_t *)&len);
         if (read_size < 0)
         {
             std::cerr << "Error: Failed to receive message!"
@@ -521,8 +524,8 @@ void client::receive_msg() {
         str_message.append(buf);
 
         m.ParseFromString(str_message);
-        std::cout << "From receiving: " << m.DebugString();
-        std::cout << "Raw String: " << str_message << std::endl;
+        std::cout << "From receiving: " << m.DebugString() << std::endl;
+        std::cout << "Raw String: " << str_message << " length: " << m.ByteSizeLong() << std::endl;
 
         // Push to messages with lock/unlock
         message_buffer.push_back(m);
@@ -538,10 +541,6 @@ void client::transfer_msg() {
         if (udp_send_queue.size() == 0)
             continue;
         udp_send_t* send_task = udp_send_queue[0];
-
-        printf("Ptr Addr: %llu", (uint64_t)send_task);        
-        std::cout << "Transfer message: " << send_task->message.transaction().amount() << std::endl;
-
         
         timespec curr_time;
         clock_gettime(CLOCK_REALTIME, &curr_time);
@@ -581,8 +580,8 @@ void client::broadcast(message_t& message) {
         client_addr.sin_addr.s_addr = inet_addr(CLIENT_IP);
         client_addr.sin_port = htons(UDP_BASE_PORT + cid);
         size_t bytes_count = sendto(sockfd_UDP, msg_string.c_str(), msg_string.size(), 0, (sockaddr*)&client_addr, sizeof(client_addr));
-        if (bytes_count < sizeof(message)) {
-            printf("Send message to process id: %d failed. Send %ld out of %ld bytes", cid, bytes_count, sizeof(message));
+        if (bytes_count < msg_string.size()) {
+            printf("[boardcast] Send message to process id: %d failed. Send %ld out of %ld bytes", cid, bytes_count, sizeof(message));
         }
     }
 }

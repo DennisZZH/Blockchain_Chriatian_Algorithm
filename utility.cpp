@@ -76,7 +76,7 @@ int64_t get_dt_sec(timespec &t0, timespec &t1) {
  * @return uint32_t 
  */
 uint32_t random_uint32(uint32_t range) {
-    return ceil(rand() * range);
+    return ceil((double)rand()/RAND_MAX * range);
 }
 
 /**
