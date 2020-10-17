@@ -31,12 +31,13 @@ public:
     int balance_transaction();
     int transfer_transaction(int sid, int rid, float amt);
     std::string serialize_transaction();    // A function that prints the block chain for debugging.
-    
+    int get_client_id() {return client_id;};
+    void stop_client();                     // Terminate client 
+
 private:
     std::mutex simulated_time_mutex;
     timestamp_t simulated_time;
     int client_id;                  // id number of this client
-    int port_id_TCP;                // port number used by this client for TCP socket
     int port_id_UDP;                // port number used by this client for UDP socket
     int sockfd_TCP;                 // TCP socket connection to time server
     int sockfd_UDP;                 // UDP socket for peer clients communication

@@ -77,17 +77,21 @@ int main(int argc, char* argv[]) {
             }
             int recv_id = atoi(args[1].c_str());
             int amount = atoi(args[2].c_str());
-            // TODO: Call the transfer transaction method.
+
+            // Call the transfer transaction method.
+            c.transfer_transaction(c.get_client_id(), recv_id, amount);
         }
         else if (cmd.compare("b") == 0 || cmd.compare("balance") == 0)
         {
-            // TODO: Call the balance transaction method.
+            // Call the balance transaction method.
+            int balance = c.balance_transaction();
+            std::cout<<"Current balance = "<<balance<<std::endl;
         }
         else if (cmd.compare("s") == 0 || cmd.compare("stop") == 0)
         {
             running = false;
-            // TODO: Set the stop_flag in the class to be true.
-            
+            // Set the stop_flag in the class to be true.
+            c.stop_client();
         } 
         else 
         {
@@ -118,25 +122,22 @@ int main(int argc, char* argv[]) {
     // return 0;
 }
 
-void client::broadcast(message_t& message) {
-    std::string msg_string = message.SerializeAsString();
-    for (int cid = 0; cid < 3; cid++) {
-        if (cid == this->client_id)
-            continue;
-        sockaddr_in client_addr = {0};
-        client_addr.sin_family = AF_INET;
-        client_addr.sin_addr.s_addr = inet_addr(CLIENT_IP);
-        client_addr.sin_port = htons(UDP_BASE_PORT + cid);
-        size_t bytes_count = sendto(sockfd_UDP, msg_string.c_str(), msg_string.size(), 0, (sockaddr*)&client_addr, sizeof(client_addr));
-        if (bytes_count < sizeof(message)) {
-            printf("Send message to process id: %d failed. Send %ld out of %ld bytes", cid, bytes_count, sizeof(message));
-        }
+void client::stop_client() {
+    // Send stop requrst to server
+    request_t request;
+    std::string msg_str;
+    request.set_type(REQUEST_STOP_TYPE);
+    request.SerializeToString(&msg_str);
+    if(send(sockfd_TCP, msg_str.c_str(), sizeof(request_t), 0) < 0){
+        std::cerr<<"Error: Failed to send out the request to time server!"<<std::endl;
+        exit(0);
     }
+    // Terminate client threads
+    stop_flag = true;
 }
 
 client::client(int cid) {
     client_id = cid;
-    port_id_TCP = TCP_BASE_PORT + cid;
     port_id_UDP = UDP_BASE_PORT + cid;
 
     // Establish TCP connection to the Time Server
@@ -147,20 +148,21 @@ client::client(int cid) {
 
     // Spawn a Thread for continously receiving from peer clients
     receive_msg_thread = std::thread(&client::receive_msg, this);
+    std::cout<<"receive_msg_thread created!"<<std::endl;
 
     // Spawn a Thread for continously checking udp_send_queue and send
     transfer_msg_thread = std::thread(&client::transfer_msg, this);
+    std::cout<<"transfer_msg_thread created!"<<std::endl;
 
     // Spawn a Thread for simulating time
     // Initialize time
     simulated_time.set_nanos(0);
     simulated_time.set_seconds(0);
-    simulate_time_thread = std::thread(&client::simulate_time, this); 
+    simulate_time_thread = std::thread(&client::simulate_time, this);
+    std::cout<<"simulate_time_thread created!"<<std::endl;
 }
 
 client::~client() {
-    stop_flag = true;
-
     // Join threads
     receive_msg_thread.join();
     simulate_time_thread.join();
@@ -458,7 +460,7 @@ void client::receive_msg() {
     message_t m;
     struct sockaddr_in recvaddr;
     memset(&recvaddr, 0, sizeof(recvaddr));
-    while (true)
+    while (!stop_flag)
     {
         m.Clear();
         bzero(buf, sizeof(buf));
@@ -513,38 +515,18 @@ void client::transfer_msg() {
     }
 }
 
-
-
-// void client::broadcast(message_t& message) {
-//      // Figure out peer port number
-//     std::string str_msg = message.SerializeAsString();
-
-//     int peer_port1 = 8020, peer_port2 = 8020;
-//     if (client_id == 1) {
-//         peer_port1 += 2;
-//         peer_port2 += 3;
-//     }
-//     else if (client_id == 2) {
-//         peer_port1 += 1;
-//         peer_port2 += 3;
-//     }
-//     else {
-//         peer_port1 += 1;
-//         peer_port2 += 2;
-//     }
-
-//     char* server_ip = "127.0.0.1";
-
-//     // Filling peer information and send
-//     struct sockaddr_in peeraddr;
-//     memset(&peeraddr, 0, sizeof(peeraddr)); 
-//     peeraddr.sin_family = AF_INET; 
-//     peeraddr.sin_addr.s_addr = inet_addr(server_ip); 
-
-//     // Send out message to peers
-//     peeraddr.sin_port = htons(peer_port1); 
-//     sendto(sockfd_UDP, str_msg.c_str(), sizeof(message_t), 0, (const sockaddr *)&peeraddr, sizeof(peeraddr));
-
-//     peeraddr.sin_port = htons(peer_port2); 
-//     sendto(sockfd_UDP, str_msg.c_str(), sizeof(message_t), 0, (const sockaddr *)&peeraddr, sizeof(peeraddr));
-// }
+void client::broadcast(message_t& message) {
+    std::string msg_string = message.SerializeAsString();
+    for (int cid = 0; cid < 3; cid++) {
+        if (cid == this->client_id)
+            continue;
+        sockaddr_in client_addr = {0};
+        client_addr.sin_family = AF_INET;
+        client_addr.sin_addr.s_addr = inet_addr(CLIENT_IP);
+        client_addr.sin_port = htons(UDP_BASE_PORT + cid);
+        size_t bytes_count = sendto(sockfd_UDP, msg_string.c_str(), msg_string.size(), 0, (sockaddr*)&client_addr, sizeof(client_addr));
+        if (bytes_count < sizeof(message)) {
+            printf("Send message to process id: %d failed. Send %ld out of %ld bytes", cid, bytes_count, sizeof(message));
+        }
+    }
+}
