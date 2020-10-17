@@ -49,7 +49,8 @@ int main(int argc, char* argv[]) {
         exit(1);
     }
 
-    // client c(cid);
+    client c(cid);
+
     bool running = true;
     std::string input;
     while (running) {
@@ -411,7 +412,7 @@ void client::connect_to_server() {
 
     server_address.sin_family = AF_INET;
     server_address.sin_addr.s_addr = inet_addr(SERVER_IP);
-    server_address.sin_port = htons(port_id_TCP);
+    server_address.sin_port = htons(SERVER_BASE_PORT + client_id);
 
     if (connect(sockfd_TCP, (struct sockaddr*)&server_address, sizeof(server_address)) != 0) {
         printf("Error number: %d\n", errno);

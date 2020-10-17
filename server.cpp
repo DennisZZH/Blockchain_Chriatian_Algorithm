@@ -22,7 +22,7 @@ int main() {
     std::cin>>input;
 
     if (input == 'Y') {
-        server s();
+        server s;
     }
 
     std::cout<<"Server finished!"<<std::endl;
@@ -57,7 +57,7 @@ int server::set_up_connection() {
     for (int i = 0; i < 3; i++) {
         addresses[i].sin_family = AF_INET;
         addresses[i].sin_addr.s_addr = INADDR_ANY;
-        addresses[i].sin_port = htons(server_port + 1 + i);
+        addresses[i].sin_port = htons(server_port + i);
         if (bind(server_sockets[i], (struct sockaddr *)(addresses + i), sizeof(addresses[i])) < 0) {
             std::cerr << "Bind failed on " << i + 1 << " socket!\n";
             exit(0);
