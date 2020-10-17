@@ -103,6 +103,11 @@ client::~client() {
     // Join threads
     receive_msg_thread.join();
     simulate_time_thread.join();
+    transfer_msg_thread.join();
+
+    // Close socket
+    close(sockfd_TCP);
+    close(sockfd_UDP);
 }
 
 float client::get_balance(){
@@ -396,9 +401,7 @@ void client::receive_msg() {
         // std::cout << "From receiving: " << m.DebugString();
 
         // Push to messages with lock/unlock
-        // TODO：lock
         message_buffer.push_back(m);
-        // TODO：unlock
     }
 }
 

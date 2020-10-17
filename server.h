@@ -15,6 +15,7 @@ struct argu_t{
 class server {    
 public:
     server();
+    ~server();
     int set_up_connection();
     int run_time_server();
 

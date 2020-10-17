@@ -1,6 +1,7 @@
 #include "server.h"
 #include "Msg.pb.h"
 #include "parameters.h"
+#include "utility.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -15,7 +16,17 @@
 
 int main() {
     // Run server routine
-    // TODO
+    char input;
+
+    std::cout<<"Do you want to run server now? (Y/N)"<<std::endl;
+    std::cin>>input;
+
+    if (input == 'Y') {
+        server s();
+    }
+
+    std::cout<<"Server finished!"<<std::endl;
+
     return 0;
 }
 
@@ -24,6 +35,8 @@ server::server() {
     run_time_server();
 }
 
+server::~server() {
+}
 
 int server::set_up_connection() {
     struct sockaddr_in addresses[3];
@@ -119,6 +132,10 @@ void* manage_clients(void* args) {
         timestamp_msg.set_nanos(timestamp.tv_usec);
         strMessage = timestamp_msg.SerializeAsString();
         
+        // Add random delay
+        uint32_t delay = random_uint32(COMM_DELAY_MAX);
+        sleep(delay);
+
         int send_size = 0;
         if ((send_size = send(cur_sockfd, strMessage.c_str(), sizeof(timestamp_t), 0)) < 0) {
             std::cerr << "Failed\n";
