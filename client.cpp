@@ -304,6 +304,29 @@ std::string client::serialize_transaction() {
 }
 
 // Private functions
+uint64_t client::calc_message_size() {
+    timespec start_time = {0};
+
+    timestamp_t *timestamp = new timestamp_t();
+    transaction_t *transaction = new transaction_t();
+
+    clock_gettime(CLOCK_REALTIME, &start_time);
+    timestamp->set_seconds(start_time.tv_sec);
+    timestamp->set_nanos(start_time.tv_nsec);
+    transaction->set_sender_id(2);
+    transaction->set_receiver_id(1);
+    transaction->set_amount(10.0);
+    // [size][message_raw_string] 
+    message_t message;
+
+    message.set_client_id(3);
+    message.set_allocated_timestamp(timestamp);
+    message.set_allocated_transaction(transaction);
+    
+    uint64_t size = message.SerializeAsString().size();
+    return size;
+}
+
 void client::sync_server_time(timespec& time) {
     timespec t0, t1;
     clock_gettime(CLOCK_REALTIME, &t0);
@@ -474,9 +497,12 @@ void client::setup_peer_connection() {
 
 void client::receive_msg() {
     int read_size = 0;
-    char buf[sizeof(message_t)];
+    
     std::string str_message;
     message_t m;
+    uint64_t buff_size = calc_message_size();
+    std::cout << "Buffer size: " << buff_size << std::endl;
+    char buf[buff_size + 1];
     struct sockaddr_in recvaddr;
     memset(&recvaddr, 0, sizeof(recvaddr));
     while (!stop_flag)
@@ -495,7 +521,8 @@ void client::receive_msg() {
         str_message.append(buf);
 
         m.ParseFromString(str_message);
-        // std::cout << "From receiving: " << m.DebugString();
+        std::cout << "From receiving: " << m.DebugString();
+        std::cout << "Raw String: " << str_message << std::endl;
 
         // Push to messages with lock/unlock
         message_buffer.push_back(m);
@@ -544,6 +571,8 @@ void client::transfer_msg() {
 
 void client::broadcast(message_t& message) {
     std::string msg_string = message.SerializeAsString();
+    std::cout << "Transfering String: " << message.DebugString() << std::endl;
+    std::cout << "Raw String size: " << msg_string.size() << std::endl;
     for (int cid = 0; cid < 3; cid++) {
         if (cid == this->client_id)
             continue;

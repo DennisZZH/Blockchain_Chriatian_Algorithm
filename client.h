@@ -9,6 +9,20 @@
 #include <thread>
 #include "Msg.pb.h"
 
+// message	message_t {
+// 	required int32 client_id = 1;
+// 	required timestamp_t timestamp = 2;
+// 	required transaction_t transaction = 3;
+// }
+/**
+ * struct {
+ *  uint32 id;
+ * timestamp_t *time = 0;
+ * trans_t *trans =;
+ * }
+ * 
+ */
+
 typedef struct {
     uint32_t delay_seconds;
     timespec start_time;            // Note this should be the real world time because we are simulating the delay.
@@ -57,6 +71,7 @@ private:
     void get_simulated_time(timespec& result);
     void set_simulated_time(timespec& time);  
     void sync_server_time(timespec& time);
+    uint64_t calc_message_size();
 
     void connect_to_server();       // function for establishing TCP connection to server
     void setup_peer_connection();   // function for seting up UDP connection with peer clients
