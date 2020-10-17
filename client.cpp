@@ -54,19 +54,17 @@ int main(int argc, char* argv[]) {
     bool running = true;
     std::string input;
     while (running) {
+        std::cout << "input: " << std::endl;
         // Parse user input
         input.clear();
         std::getline(std::cin, input);
         std::stringstream ss(input);
         std::vector<std::string> args;
-        std::cout << "Input: " << ss.str() << std::endl;
         while (ss.good()) {
             std::string arg = "";
             ss >> arg;
             args.push_back(arg);
         }
-        
-        std::cout << "args size: " << args.size() << std::endl;
 
         std::string &cmd = args[0];
         if (cmd.compare("t") == 0 || cmd.compare("transfer") == 0) 
@@ -76,16 +74,27 @@ int main(int argc, char* argv[]) {
                 continue;
             }
             int recv_id = atoi(args[1].c_str());
-            int amount = atoi(args[2].c_str());
+            float amount = (float)atof(args[2].c_str());
 
             // Call the transfer transaction method.
-            c.transfer_transaction(c.get_client_id(), recv_id, amount);
+            int status = c.transfer_transaction(c.get_client_id(), recv_id, amount);
+            switch (status) {
+                case INSUFFICIENT_BALANCE_ERROR:
+                    std::cout << "Insufficient balance!" << std::endl;
+                    break;
+                case ILLEGAL_SENDER_ERROR:
+                    std::cout << "Illegal sender!" << std::endl;
+                    break;
+                default:
+                    std::cout << "Transfer successfully." << std::endl; 
+            }
         }
         else if (cmd.compare("b") == 0 || cmd.compare("balance") == 0)
         {
             // Call the balance transaction method.
-            int balance = c.balance_transaction();
-            std::cout<<"Current balance = "<<balance<<std::endl;
+            c.balance_transaction();
+            float balance = c.get_balance();
+            std::cout<<"Current balance = "<< balance <<std::endl;
         }
         else if (cmd.compare("s") == 0 || cmd.compare("stop") == 0)
         {
@@ -145,6 +154,12 @@ client::client(int cid) {
 
     // Setup UDP connection with peer clients
     setup_peer_connection();
+
+    transaction_t trans;
+    trans.set_amount(10);
+    trans.set_receiver_id(cid);
+    trans.set_sender_id(-1);
+    blockchain.push_back(trans);
 
     // Spawn a Thread for continously receiving from peer clients
     receive_msg_thread = std::thread(&client::receive_msg, this);
@@ -246,23 +261,27 @@ int client::transfer_transaction(int sid, int rid, float amt) {
     // Prepare send task
     udp_send_t* task = new udp_send_t();
     timespec start_time = {0};
-    message_t message;
-    transaction_t transaction;
-    timestamp_t timestamp;
+
+    timestamp_t *timestamp = new timestamp_t();
+    transaction_t *transaction = new transaction_t();
 
     get_simulated_time(start_time);
-    timestamp.set_seconds(start_time.tv_sec);
-    timestamp.set_nanos(start_time.tv_nsec);
-    transaction.set_sender_id(sid);
-    transaction.set_receiver_id(rid);
-    transaction.set_amount(amt);
-    message.set_client_id(client_id);
-    message.set_allocated_timestamp(&timestamp);
-    message.set_allocated_transaction(&transaction);
-
-    task->start_time = start_time;
+    timestamp->set_seconds(start_time.tv_sec);
+    timestamp->set_nanos(start_time.tv_nsec);
+    transaction->set_sender_id(sid);
+    transaction->set_receiver_id(rid);
+    transaction->set_amount(amt);
+    
+    // set timestamp
+    task->start_time.tv_nsec = start_time.tv_nsec;
+    task->start_time.tv_sec = start_time.tv_sec;
+    // set delay
     task->delay_seconds = random_uint32(COMM_DELAY_MAX);
-    task->message = message;
+    // set message
+    task->message.set_client_id(client_id);
+    task->message.set_allocated_timestamp(timestamp);
+    task->message.set_allocated_transaction(transaction);
+
     // Add message to send queue
     udp_send_queue.push_back(task);
 
@@ -480,6 +499,9 @@ void client::receive_msg() {
 
         // Push to messages with lock/unlock
         message_buffer.push_back(m);
+        transaction_t trans = m.transaction();
+        timestamp_t time = m.timestamp();
+        printf("[Received] Sender: %d | Amount: %f | SenderTime: %lld.%d\n", trans.sender_id(), trans.amount(), time.seconds(), time.nanos());
     }
 }
 
@@ -489,6 +511,11 @@ void client::transfer_msg() {
         if (udp_send_queue.size() == 0)
             continue;
         udp_send_t* send_task = udp_send_queue[0];
+
+        printf("Ptr Addr: %llu", (uint64_t)send_task);        
+        std::cout << "Transfer message: " << send_task->message.transaction().amount() << std::endl;
+
+        
         timespec curr_time;
         clock_gettime(CLOCK_REALTIME, &curr_time);
         uint64_t diff_in_sec = get_dt_sec(send_task->start_time, curr_time);

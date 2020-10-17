@@ -15,6 +15,8 @@ typedef struct {
     message_t message;
 } udp_send_t;
 
+// [32] [timespec] [messge [ptr][ptr]] 
+
 // [] [C][B][A] >>>>>> []
 // [5] [1] [3] [2]
 //  ^

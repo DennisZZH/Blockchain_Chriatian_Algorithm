@@ -9,6 +9,9 @@ Msg.pb.h
 client
 server
 
+# Symbols
+*.dSYM
+
 # Prerequisites
 *.d
 
