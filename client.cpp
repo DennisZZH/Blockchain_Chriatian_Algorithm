@@ -14,6 +14,22 @@
 #include <errno.h>
 #include <sys/time.h>
 #include <thread>
+#include <sstream>
+
+
+/**
+ * @brief User input format:
+ * - Transfer Transaction: t / transfer <receiver id> <amount>
+ * - Balance Transaction: b / balance
+ * - Stop Running: s / stop
+ */
+
+#define CMD_TRANS_ARGS_NUM  2
+#define CMD_BALANCE_ARGS_NUM 0
+
+typedef enum {
+    BLOCK 
+} input_option_t;
 
 const char* usage = "Run the program by typing ./client <cid> where cid is within range [0, 2].";
 inline void print_usage() {
@@ -33,28 +49,72 @@ int main(int argc, char* argv[]) {
         exit(1);
     }
 
-    client c(cid);
-    
+    // client c(cid);
+    bool running = true;
+    std::string input;
+    while (running) {
+        // Parse user input
+        input.clear();
+        std::getline(std::cin, input);
+        std::stringstream ss(input);
+        std::vector<std::string> args;
+        std::cout << "Input: " << ss.str() << std::endl;
+        while (ss.good()) {
+            std::string arg = "";
+            ss >> arg;
+            args.push_back(arg);
+        }
+        
+        std::cout << "args size: " << args.size() << std::endl;
+
+        std::string &cmd = args[0];
+        if (cmd.compare("t") == 0 || cmd.compare("transfer") == 0) 
+        {
+            if (args.size() != CMD_TRANS_ARGS_NUM + 1) {
+                std::cout << "Command format is not correct." << std::endl;
+                continue;
+            }
+            int recv_id = atoi(args[1].c_str());
+            int amount = atoi(args[2].c_str());
+            // TODO: Call the transfer transaction method.
+        }
+        else if (cmd.compare("b") == 0 || cmd.compare("balance") == 0)
+        {
+            // TODO: Call the balance transaction method.
+        }
+        else if (cmd.compare("s") == 0 || cmd.compare("stop") == 0)
+        {
+            running = false;
+            // TODO: Set the stop_flag in the class to be true.
+            
+        } 
+        else 
+        {
+            std::cout << "Unknown command type. Supported commands: transfer(t), balance(b), stop(s)" << std::endl;
+        }
+
+    }
+
 
     // Test Code
-    timespec t0, t1, diff, div;
-    clock_gettime(CLOCK_REALTIME, &t0);
-    while(true) {
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));
-        clock_gettime(CLOCK_REALTIME, &t1);
-        get_dt(t0, t1, diff);
-        // std::cout << "t0: " << t0.tv_sec << " " << t0.tv_nsec << "t1: " << t1.tv_sec << " " << t1.tv_nsec << std::endl;
-        std::cout << "Old Nano: " << t0.tv_nsec << std::endl;
-        std::cout << "New Nano: " << t1.tv_nsec << std::endl;
-        std::cout << "Increment: " << diff.tv_sec << "s " << diff.tv_nsec/1000000 << "ms " << std::endl;
-        divide_time(diff, 2, div);
-        std::cout << "Div: " << div.tv_sec << "s " << div.tv_nsec / 1000000 << "ms " << std::endl;
-        get_dt(t1, t0, diff);
-        std::cout << "Increment: " << diff.tv_sec << "s " << diff.tv_nsec/1000000 << "ms " << std::endl;
-        std::cout << std::endl;
-        // memcpy(&t0, &t1, sizeof(t1));
-    }
-    return 0;
+    // timespec t0, t1, diff, div;
+    // clock_gettime(CLOCK_REALTIME, &t0);
+    // while(true) {
+    //     std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    //     clock_gettime(CLOCK_REALTIME, &t1);
+    //     get_dt(t0, t1, diff);
+    //     // std::cout << "t0: " << t0.tv_sec << " " << t0.tv_nsec << "t1: " << t1.tv_sec << " " << t1.tv_nsec << std::endl;
+    //     std::cout << "Old Nano: " << t0.tv_nsec << std::endl;
+    //     std::cout << "New Nano: " << t1.tv_nsec << std::endl;
+    //     std::cout << "Increment: " << diff.tv_sec << "s " << diff.tv_nsec/1000000 << "ms " << std::endl;
+    //     divide_time(diff, 2, div);
+    //     std::cout << "Div: " << div.tv_sec << "s " << div.tv_nsec / 1000000 << "ms " << std::endl;
+    //     get_dt(t1, t0, diff);
+    //     std::cout << "Increment: " << diff.tv_sec << "s " << diff.tv_nsec/1000000 << "ms " << std::endl;
+    //     std::cout << std::endl;
+    //     // memcpy(&t0, &t1, sizeof(t1));
+    // }
+    // return 0;
 }
 
 void client::broadcast(message_t& message) {
@@ -204,6 +264,21 @@ int client::transfer_transaction(int sid, int rid, float amt) {
     udp_send_queue.push_back(task);
 
     return 0;
+}
+
+std::string client::serialize_transaction() {
+    uint32_t size = blockchain.size();
+    std::stringstream ss("");
+    std::list<transaction_t>::iterator it_trans = blockchain.begin();
+    while (size) {
+        ss << "================" << std::endl;
+        ss << "Sender: " << it_trans->sender_id() << std::endl;
+        ss << "Receiver: " << it_trans->receiver_id() << std::endl;
+        ss << "Amount: " << it_trans->amount() << std::endl;
+        it_trans ++;
+        size--;
+    }
+    return ss.str();
 }
 
 // Private functions
@@ -436,6 +511,8 @@ void client::transfer_msg() {
         delete send_task;
     }
 }
+
+
 
 // void client::broadcast(message_t& message) {
 //      // Figure out peer port number
