@@ -501,7 +501,6 @@ void client::setup_peer_connection() {
 void client::receive_msg() {
     int read_size = 0;
     
-    std::string str_message;
     message_t m;
     uint64_t buff_size = calc_message_size();
     std::cout << "To receive size: " << buff_size << std::endl;
@@ -512,21 +511,19 @@ void client::receive_msg() {
     {
         m.Clear();
         bzero(buf, sizeof(buf));
-        str_message.clear();
         int len = sizeof(recvaddr);
         read_size = recvfrom(sockfd_UDP, buf, buff_size, MSG_WAITALL, (struct sockaddr *)&recvaddr, (socklen_t *)&len);
+        std::cout << "Read size: " << read_size << std::endl;
         if (read_size < 0)
         {
             std::cerr << "Error: Failed to receive message!"
                       << "\n";
             exit(0);
         }
-        str_message.append(buf);
 
-        m.ParseFromString(str_message);
+        m.ParseFromArray(buf, read_size);
         std::cout << "From receiving: " << m.DebugString() << std::endl;
-        std::cout << "Raw String: " << str_message << " length: " << m.ByteSizeLong() << std::endl;
-
+        
         // Push to messages with lock/unlock
         message_buffer.push_back(m);
         transaction_t trans = m.transaction();
