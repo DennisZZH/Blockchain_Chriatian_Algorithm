@@ -54,7 +54,7 @@ int main(int argc, char* argv[]) {
     bool running = true;
     std::string input;
     while (running) {
-        std::cout << "input: " << std::endl;
+        std::cout << "input: ";
         // Parse user input
         input.clear();
         std::getline(std::cin, input);
@@ -85,8 +85,9 @@ int main(int argc, char* argv[]) {
                 case ILLEGAL_SENDER_ERROR:
                     std::cout << "Illegal sender!" << std::endl;
                     break;
-                default:
-                    std::cout << "Transfer successfully." << std::endl; 
+                // default:
+                    // std::cout << "Transfer successfully." << std::endl; 
+                    
             }
         }
         else if (cmd.compare("b") == 0 || cmd.compare("balance") == 0)
@@ -195,6 +196,9 @@ float client::get_balance(){
         if (it->receiver_id() == client_id && it->sender_id() != client_id) {
             balance += it->amount();
         }
+        if (it->sender_id() == client_id && it->receiver_id() != client_id) {
+            balance -= it->amount();
+        }
     }
     return balance;
 }
@@ -283,7 +287,10 @@ int client::transfer_transaction(int sid, int rid, float amt) {
     task->message.set_client_id(client_id);
     task->message.set_allocated_timestamp(timestamp);
     task->message.set_allocated_transaction(transaction);
-    
+
+    // Add to local message buffer.
+    message_t local_message(task->message); // Here the copy constructor will automatically deal with the pointer deep copy.
+    message_buffer.push_back(local_message);
 
     // Add message to send queue
     udp_send_queue.push_back(task);
@@ -503,7 +510,6 @@ void client::receive_msg() {
     
     message_t m;
     uint64_t buff_size = calc_message_size();
-    std::cout << "To receive size: " << buff_size << std::endl;
     char buf[buff_size + 1];
     struct sockaddr_in recvaddr;
     memset(&recvaddr, 0, sizeof(recvaddr));
@@ -513,7 +519,7 @@ void client::receive_msg() {
         bzero(buf, sizeof(buf));
         int len = sizeof(recvaddr);
         read_size = recvfrom(sockfd_UDP, buf, buff_size, MSG_WAITALL, (struct sockaddr *)&recvaddr, (socklen_t *)&len);
-        std::cout << "Read size: " << read_size << std::endl;
+        // std::cout << "[receive_msg]Read size: " << read_size << std::endl;
         if (read_size < 0)
         {
             std::cerr << "Error: Failed to receive message!"
@@ -522,7 +528,7 @@ void client::receive_msg() {
         }
 
         m.ParseFromArray(buf, read_size);
-        std::cout << "From receiving: " << m.DebugString() << std::endl;
+        // std::cout << "From receiving: " << m.DebugString() << std::endl;
         
         // Push to messages with lock/unlock
         message_buffer.push_back(m);
@@ -567,8 +573,8 @@ void client::transfer_msg() {
 
 void client::broadcast(message_t& message) {
     std::string msg_string = message.SerializeAsString();
-    std::cout << "Transfering String: " << message.DebugString() << std::endl;
-    std::cout << "Raw String size: " << msg_string.size() << std::endl;
+    // std::cout << "Transfering String: " << message.DebugString() << std::endl;
+    // std::cout << "Raw String size: " << msg_string.size() << std::endl;
     for (int cid = 0; cid < 3; cid++) {
         if (cid == this->client_id)
             continue;
