@@ -158,6 +158,8 @@ client::client(int cid) {
     client_id = cid;
     port_id_UDP = UDP_BASE_PORT + cid;
 
+    drift_factor = (double)rand()/RAND_MAX * 2 * TIME_DRIFT_FACTOR - TIME_DRIFT_FACTOR;
+
     // Establish TCP connection to the Time Server
     connect_to_server();
 
@@ -470,7 +472,7 @@ void client::simulate_time() {   // REVIEW: Need to verify this function.
             // uint64_t dt_ns = get_dt_nanosec(prev_systime, curr_systime);
             get_dt(prev_systime, curr_systime, dt);
             // std::cout << "[simulate_time] Before Scale: " << dt.tv_sec << "." << dt.tv_nsec << std::endl; 
-            scale_time(dt, (1 + TIME_DRIFT_FACTOR), dt);
+            scale_time(dt, (1 + drift_factor), dt);
             // std::cout << "[simulate_time] After Scale: " << dt.tv_sec << "." << dt.tv_nsec << std::endl;
             increase_time(local_time, dt);
             set_simulated_time(local_time);
@@ -479,7 +481,7 @@ void client::simulate_time() {   // REVIEW: Need to verify this function.
         }
 
         // Check if the time difference between clients pass the max tolerable drift.
-        if (get_dt_sec(last_synctime, curr_systime) >= TIME_DIFF_TOLERANCE / (2 * TIME_DRIFT_FACTOR)) {
+        if (get_dt_sec(last_synctime, curr_systime) >= TIME_DIFF_TOLERANCE / (2 * drift_factor)) {
             sync_server_time(local_time);
             clock_gettime(CLOCK_REALTIME, &curr_systime);
             set_simulated_time(local_time);

@@ -58,6 +58,8 @@ private:
     int sockfd_TCP;                 // TCP socket connection to time server
     int sockfd_UDP;                 // UDP socket for peer clients communication
 
+    double drift_factor;             // drift factor to this local client.    
+
     std::deque<udp_send_t*> udp_send_queue;   // This queue is used to hold the dynamic allocated send tasks.
     std::deque<message_t> message_buffer;
     std::list<transaction_t> blockchain;
