@@ -71,7 +71,8 @@ private:
     void get_simulated_time(timespec& result);
     void set_simulated_time(timespec& time);  
     void sync_server_time(timespec& time);
-    uint64_t calc_message_size();
+    uint64_t calc_message_size();       // Maybe good to move to utility.
+    uint64_t calc_timestamp_size();     // Maybe good to move to utility.
 
     void connect_to_server();       // function for establishing TCP connection to server
     void setup_peer_connection();   // function for seting up UDP connection with peer clients

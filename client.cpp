@@ -337,6 +337,14 @@ uint64_t client::calc_message_size() {
     return size;
 }
 
+uint64_t client::calc_timestamp_size() {
+    timestamp_t timestamp;
+    timestamp.set_seconds(1);
+    timestamp.set_nanos(1);
+    return timestamp.ByteSizeLong();
+}
+
+// REVIEW: Need to review the exit in this function.
 void client::sync_server_time(timespec& time) {
     timespec t0, t1;
     clock_gettime(CLOCK_REALTIME, &t0);
@@ -347,53 +355,56 @@ void client::sync_server_time(timespec& time) {
     request_t request;
     std::string msg_str;
     request.set_type(REQUEST_TIME_TYPE);
-    request.SerializeToString(&msg_str);
-    if(send(sockfd_TCP, msg_str.c_str(), sizeof(request_t), 0) < 0){
-        std::cerr<<"Error: Failed to send out the request to time server!"<<std::endl;
+    msg_str = request.SerializeAsString();
+    if(send(sockfd_TCP, msg_str.c_str(), msg_str.size(), 0) < 0){
+        std::cerr<<"[sync_server_time] Failed to send out the request to time server!"<<std::endl;
         exit(0);
     }
 
     // Receive respons from server
-    char buf[sizeof(timestamp_t)];
-    int to_read = sizeof(timestamp_t), siz_read = 0;
-    timestamp_t t;
-    msg_str.clear();
-    while(to_read != 0){
-        siz_read = recv(sockfd_TCP, buf, sizeof(timestamp_t), 0);
-        if(siz_read < 0){
-            std::cerr<<"Error: Failed to recv the message from time server!"<<std::endl;
-            exit(0);
-        }
-        to_read -= siz_read;
-        msg_str.append(buf);
-        bzero(buf, sizeof(buf));
+    char buff[calc_timestamp_size()];
+    int read_size = recv(sockfd_TCP, buff, sizeof(buff), 0);
+    if(read_size <= 0){
+        std::cerr << "[sync_server_time] The server socket is failed or closed." << std::endl;
+        exit(0);
     }
-    t.ParseFromString(msg_str);
+
+    if (read_size != sizeof(buff)) {
+        std::cerr << "[sync_server_time] Received invalid timestamp message from the server." << std::endl;
+        exit(0);    
+    }
+
+    timestamp_t server_time;
+    server_time.ParseFromArray(buff, read_size);
+    std::cout << "[sync_server_time] Received server time: " << server_time.seconds() << "." << server_time.nanos() * 1000 / SEC_IN_NANOSEC << std::endl; 
 
     clock_gettime(CLOCK_REALTIME, &t1);
     
     // REVIEW: Assign the new value based on christian's algorithm.
-    timespec sync_timestamp = {0}, local_timestamp = {0};
+    timespec sync_timestamp = {0};
     // Calculate half trip time
     timespec delta_time = {0};
     get_dt(t0, t1, delta_time);
     divide_time(delta_time, 2, delta_time);
 
     // Christian Algorithm
-    sync_timestamp.tv_sec = t.seconds();
-    sync_timestamp.tv_nsec = t.nanos();
+    sync_timestamp.tv_sec = server_time.seconds();
+    sync_timestamp.tv_nsec = server_time.nanos();
     increase_time(sync_timestamp, delta_time);
 
 
     // Implement slow down speed up algorithm.
-    get_simulated_time(local_timestamp);
-    if (compare_time(local_timestamp, sync_timestamp) > 0) { // Local time is faster
+    // get_simulated_time(local_timestamp);
+    if (compare_time(time, sync_timestamp) > 0) { // Local time is faster
         timespec diff = {0};
-        get_dt(sync_timestamp, local_timestamp, diff);
+        get_dt(sync_timestamp, time, diff);
+        std::cout << "[sync_server_time] Time difference: " << diff.tv_sec << "." << diff.tv_nsec * 1000 / SEC_IN_NANOSEC << std::endl;
         std::this_thread::sleep_for(std::chrono::nanoseconds(diff.tv_nsec));
         std::this_thread::sleep_for(std::chrono::seconds(diff.tv_sec));
     }
-    set_simulated_time(sync_timestamp);
+    time.tv_nsec = sync_timestamp.tv_nsec;
+    time.tv_sec = sync_timestamp.tv_sec;
+    // set_simulated_time(sync_timestamp);
 }
 
 void client::get_simulated_time(timespec& result) {
@@ -432,9 +443,12 @@ void client::simulate_time() {   // REVIEW: Need to verify this function.
             timespec dt = {0};
             // uint64_t dt_ns = get_dt_nanosec(prev_systime, curr_systime);
             get_dt(prev_systime, curr_systime, dt);
+            // std::cout << "[simulate_time] Before Scale: " << dt.tv_sec << "." << dt.tv_nsec << std::endl; 
             scale_time(dt, (1 + TIME_DRIFT_FACTOR), dt);
+            // std::cout << "[simulate_time] After Scale: " << dt.tv_sec << "." << dt.tv_nsec << std::endl;
             increase_time(local_time, dt);
             set_simulated_time(local_time);
+            // std::cout << "[simulate_time] Local Time: " << local_time.tv_sec << "." << local_time.tv_nsec << std::endl;
             memcpy(&prev_systime, &curr_systime, sizeof(curr_systime));
         }
 
@@ -460,22 +474,22 @@ void client::connect_to_server() {
     struct sockaddr_in server_address;
     sockfd_TCP = socket(AF_INET, SOCK_STREAM, 0);
     if (sockfd_TCP == -1) {
-        printf("Socket creation failed.\n");
+        printf("[connect_to_server]Socket creation failed.\n");
         exit(0);
     }
 
     server_address.sin_family = AF_INET;
     server_address.sin_addr.s_addr = inet_addr(SERVER_IP);
-    server_address.sin_port = htons(SERVER_BASE_PORT + client_id);
+    server_address.sin_port = htons(SERVER_BASE_PORT);
 
     if (connect(sockfd_TCP, (struct sockaddr*)&server_address, sizeof(server_address)) != 0) {
-        printf("Error number: %d\n", errno);
-        printf("The error message is %s\n", strerror(errno));
-        printf("Connection to the server failed.\n");
+        printf("[connect_to_server]Error number: %d\n", errno);
+        printf("[connect_to_server]The error message is %s\n", strerror(errno));
+        printf("[connect_to_server]Connection to the server failed.\n");
         exit(0);
     }
 
-    std::cout << "TCP Socket created.\n";
+    std::cout << "[connect_to_server]TCP Socket created.\n";
 }
 
 void client::setup_peer_connection() {

@@ -42,6 +42,7 @@
 #define CLIENT_IP           "127.0.0.1"
 #define UDP_BASE_PORT       8020
 #define SERVER_BASE_PORT    8000
+#define SERVER_LISTEN_PORT  SERVER_BASE_PORT
 
 /** @Insufficient balance error flag.
 * Client throw this flag when user trying to send an amt greater than its balance
