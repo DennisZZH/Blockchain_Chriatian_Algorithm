@@ -54,7 +54,7 @@ int main(int argc, char* argv[]) {
     bool running = true;
     std::string input;
     while (running) {
-        std::cout << "input: ";
+        // std::cout << "input: ";
         // Parse user input
         input.clear();
         std::getline(std::cin, input);
@@ -80,13 +80,16 @@ int main(int argc, char* argv[]) {
             int status = c.transfer_transaction(c.get_client_id(), recv_id, amount);
             switch (status) {
                 case INSUFFICIENT_BALANCE_ERROR:
-                    std::cout << "Insufficient balance!" << std::endl;
+                    std::cout << "[main]Insufficient balance!" << std::endl;
                     break;
                 case ILLEGAL_SENDER_ERROR:
-                    std::cout << "Illegal sender!" << std::endl;
+                    std::cout << "[main]Illegal sender!" << std::endl;
                     break;
-                // default:
-                    // std::cout << "Transfer successfully." << std::endl; 
+                case ILLEGAL_RECVER_ERROR:
+                    std::cout << "[main]You cannot send money to your self!" << std::endl;
+                    break;
+                default:
+                    std::cout << "[main]Successfully transferred" << std::endl; 
                     
             }
         }
@@ -96,6 +99,11 @@ int main(int argc, char* argv[]) {
             c.balance_transaction();
             float balance = c.get_balance();
             std::cout<<"Current balance = "<< balance <<std::endl;
+        }
+        else if (cmd.compare("d") == 0 || cmd.compare("debug") == 0) {
+            std::string transaction_string = c.serialize_transaction();
+            std::cout << "Transactions: " << std::endl;
+            std::cout << transaction_string << std::endl;
         }
         else if (cmd.compare("s") == 0 || cmd.compare("stop") == 0)
         {
@@ -214,46 +222,11 @@ int client::balance_transaction() {
 
     // Broadcast this balance transaction message to all peer clients   
     // broadcast_msg(BALANCE_TRANSACTION_TYPE, balance_timestamp);
-
-    std::this_thread::sleep_for(std::chrono::seconds(COMM_DELAY_MAX));
-
-    // Sort the message buffer based on the following comparator function.
-    // If this function returns true, it means m1 < m2.
-    auto comparator = [](message_t &m1, message_t &m2) {
-        // Deal with the case where timestamps are exactly same first. Use the pid to break the tie.
-        if (m1.timestamp().seconds() == m2.timestamp().seconds() && m1.timestamp().nanos() == m2.timestamp().nanos()) {
-            return m1.transaction().sender_id() < m2.transaction().sender_id();
-        }
-        
-        // if the two messages's timestamps are not the same, then compare their time stamps.
-        if (m1.timestamp().seconds() == m2.timestamp().seconds())
-            return m1.timestamp().nanos() < m2.timestamp().nanos();
-        else
-            return m1.timestamp().seconds() < m2.timestamp().seconds();
-    };
-    std::sort(message_buffer.begin(), message_buffer.begin() + message_buffer.size(), comparator);
-
-    // Iterate through the buffer to move all of the transactions has timestamp lower than logged stamp into the transaction.
-    uint32_t msg_index = 0;
-    auto is_msg_earlier = [](message_t &msg, timespec& t) {
-        uint64_t msg_sec = msg.timestamp().seconds();
-        uint32_t msg_nano = msg.timestamp().nanos();
-        return (msg_sec < t.tv_sec || msg_sec == t.tv_nsec && msg_nano == t.tv_nsec);
-    };
-    while(msg_index < message_buffer.size()) {
-        message_t& msg = message_buffer.at(msg_index);
-        if (!is_msg_earlier(msg, balance_timestamp))
-            break;
-        // Here fetch the transaction info from the buffer and move it to the blockchain list.
-        blockchain.push_back(msg.transaction());
-        msg_index ++; 
-    }
-    // Need to pop out the message. (Currently, the msg_index is pointing to the first message later than the balance_timestamp).
-    while(msg_index) {
-        //message_buffer.erase(message_buffer.begin(), message_buffer.begin() + msg_index);
-        message_buffer.pop_front();
-        msg_index --;
-    }
+    std::this_thread::sleep_for(std::chrono::seconds(COMM_DELAY_MAX + TIME_DIFF_TOLERANCE));
+    
+    sort_message_buffer();
+    move_message_blockchain(balance_timestamp);
+    std::cout << "[balance_transaction] Blockchain is updated." << std::endl;
     return 0;
 }
     
@@ -262,6 +235,8 @@ int client::transfer_transaction(int sid, int rid, float amt) {
     if (get_balance() < amt) return INSUFFICIENT_BALANCE_ERROR;
     // Check ensure client can only send its own money, ie. sid = client_id
     if (sid != client_id) return ILLEGAL_SENDER_ERROR;
+    // Check ensure client cannot send to itself
+    if (rid == client_id) return ILLEGAL_RECVER_ERROR;
     // Prepare send task
     udp_send_t* task = new udp_send_t();
     timespec start_time = {0};
@@ -294,7 +269,17 @@ int client::transfer_transaction(int sid, int rid, float amt) {
 
     // Add message to send queue
     udp_send_queue.push_back(task);
+    
+    // Wait for certain time, sort and off-load the message buffer into the blockchain list.
+    std::this_thread::sleep_for(std::chrono::seconds(COMM_DELAY_MAX + TIME_DIFF_TOLERANCE));
+    sort_message_buffer();
+    timespec lastest_timestamp;
+    message_t message = message_buffer.back();
+    lastest_timestamp.tv_sec = message.timestamp().seconds();
+    lastest_timestamp.tv_nsec = message.timestamp().nanos();
+    move_message_blockchain(lastest_timestamp);
 
+    std::cout << "[transfer_transaction] Blockchain is updated." << std::endl;
     return 0;
 }
 
@@ -314,6 +299,47 @@ std::string client::serialize_transaction() {
 }
 
 // Private functions
+void client::sort_message_buffer() {
+    // Sort the message buffer based on the following comparator function.
+    // If this function returns true, it means m1 < m2.
+    auto comparator = [](message_t &m1, message_t &m2) {
+        // Deal with the case where timestamps are exactly same first. Use the pid to break the tie.
+        if (m1.timestamp().seconds() == m2.timestamp().seconds() && m1.timestamp().nanos() == m2.timestamp().nanos()) {
+            return m1.transaction().sender_id() < m2.transaction().sender_id();
+        }
+        
+        // if the two messages's timestamps are not the same, then compare their time stamps.
+        if (m1.timestamp().seconds() == m2.timestamp().seconds())
+            return m1.timestamp().nanos() < m2.timestamp().nanos();
+        else
+            return m1.timestamp().seconds() < m2.timestamp().seconds();
+    };
+    std::sort(message_buffer.begin(), message_buffer.begin() + message_buffer.size(), comparator);
+}
+
+void client::move_message_blockchain(timespec &timestamp) {
+    uint32_t msg_index = 0;
+    auto is_not_later = [](message_t &msg, timespec& t) {
+        uint64_t msg_sec = msg.timestamp().seconds();
+        uint32_t msg_nano = msg.timestamp().nanos();
+        return (msg_sec < t.tv_sec || msg_sec == t.tv_nsec && msg_nano == t.tv_nsec);
+    };
+    while(msg_index < message_buffer.size()) {
+        message_t& msg = message_buffer.at(msg_index);
+        if (!is_not_later(msg, timestamp))
+            break;
+        // Here fetch the transaction info from the buffer and move it to the blockchain list.
+        blockchain.push_back(msg.transaction());
+        msg_index ++; 
+    }
+    // Need to pop out the message. (Currently, the msg_index is pointing to the first message later than the balance_timestamp).
+    while(msg_index) {
+        //message_buffer.erase(message_buffer.begin(), message_buffer.begin() + msg_index);
+        message_buffer.pop_front();
+        msg_index --;
+    }
+}
+
 uint64_t client::calc_message_size() {
     timespec start_time = {0};
 
@@ -376,7 +402,7 @@ void client::sync_server_time(timespec& time) {
 
     timestamp_t server_time;
     server_time.ParseFromArray(buff, read_size);
-    std::cout << "[sync_server_time] Received server time: " << server_time.seconds() << "." << server_time.nanos() * 1000 / SEC_IN_NANOSEC << std::endl; 
+    // std::cout << "[sync_server_time] Received server time: " << server_time.seconds() << "." << server_time.nanos() * 1000 / SEC_IN_NANOSEC << std::endl; 
 
     clock_gettime(CLOCK_REALTIME, &t1);
     
@@ -398,7 +424,7 @@ void client::sync_server_time(timespec& time) {
     if (compare_time(time, sync_timestamp) > 0) { // Local time is faster
         timespec diff = {0};
         get_dt(sync_timestamp, time, diff);
-        std::cout << "[sync_server_time] Time difference: " << diff.tv_sec << "." << diff.tv_nsec * 1000 / SEC_IN_NANOSEC << std::endl;
+        // std::cout << "[sync_server_time] Time difference: " << diff.tv_sec << "." << diff.tv_nsec * 1000 / SEC_IN_NANOSEC << std::endl;
         std::this_thread::sleep_for(std::chrono::nanoseconds(diff.tv_nsec));
         std::this_thread::sleep_for(std::chrono::seconds(diff.tv_sec));
     }

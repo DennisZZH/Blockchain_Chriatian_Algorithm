@@ -68,6 +68,8 @@ private:
     std::thread transfer_msg_thread;     // A thread for continously checking udp_send_queue and send
 
     // Private method
+    void sort_message_buffer();
+    void move_message_blockchain(timespec &timestamp);
     void get_simulated_time(timespec& result);
     void set_simulated_time(timespec& time);  
     void sync_server_time(timespec& time);

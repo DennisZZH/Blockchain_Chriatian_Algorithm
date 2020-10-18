@@ -15,9 +15,9 @@
  * @brief TIME_DIFF_TOLERANCE means the maximum tolerable time difference between different client in seconds.
  * 
  */
-#define TIME_DIFF_TOLERANCE 20
+#define TIME_DIFF_TOLERANCE 10
 
-#define TIME_DRIFT_FACTOR   0.5
+#define TIME_DRIFT_FACTOR   0.25
 
 /**
  * @brief The upper bound of the communication delay in seconds.
@@ -49,3 +49,4 @@
 */
 #define INSUFFICIENT_BALANCE_ERROR  -1
 #define ILLEGAL_SENDER_ERROR -2
+#define ILLEGAL_RECVER_ERROR -3
