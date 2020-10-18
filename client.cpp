@@ -80,16 +80,16 @@ int main(int argc, char* argv[]) {
             int status = c.transfer_transaction(c.get_client_id(), recv_id, amount);
             switch (status) {
                 case INSUFFICIENT_BALANCE_ERROR:
-                    std::cout << "[main]Insufficient balance!" << std::endl;
+                    std::cout << "[main] Insufficient balance!" << std::endl;
                     break;
                 case ILLEGAL_SENDER_ERROR:
-                    std::cout << "[main]Illegal sender!" << std::endl;
+                    std::cout << "[main] Illegal sender!" << std::endl;
                     break;
                 case ILLEGAL_RECVER_ERROR:
-                    std::cout << "[main]You cannot send money to your self!" << std::endl;
+                    std::cout << "[main] You cannot send money to your self!" << std::endl;
                     break;
                 default:
-                    std::cout << "[main]Successfully transferred" << std::endl; 
+                    std::cout << "[main] Successfully transferred" << std::endl; 
                     
             }
         }
@@ -98,11 +98,11 @@ int main(int argc, char* argv[]) {
             // Call the balance transaction method.
             c.balance_transaction();
             float balance = c.get_balance();
-            std::cout<<"Current balance = "<< balance <<std::endl;
+            std::cout<<"[main] Current balance = "<< balance <<std::endl;
         }
         else if (cmd.compare("d") == 0 || cmd.compare("debug") == 0) {
             std::string transaction_string = c.serialize_transaction();
-            std::cout << "Transactions: " << std::endl;
+            std::cout << "[main] Transactions: " << std::endl;
             std::cout << transaction_string << std::endl;
         }
         else if (cmd.compare("s") == 0 || cmd.compare("stop") == 0)
@@ -113,7 +113,7 @@ int main(int argc, char* argv[]) {
         } 
         else 
         {
-            std::cout << "Unknown command type. Supported commands: transfer(t), balance(b), stop(s)" << std::endl;
+            std::cout << "[main] Unknown command type. Supported commands: transfer(t), balance(b), stop(s)" << std::endl;
         }
 
     }
