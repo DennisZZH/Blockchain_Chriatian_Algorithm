@@ -76,7 +76,7 @@ int64_t get_dt_sec(timespec &t0, timespec &t1) {
  * @return uint32_t 
  */
 uint32_t random_uint32(uint32_t range) {
-    return ceil(rand() * range);
+    return ceil((double)rand()/RAND_MAX * range);
 }
 
 /**
@@ -87,7 +87,7 @@ uint32_t random_uint32(uint32_t range) {
  */
 void increase_time(timespec  &t, timespec &dt) {
     int64_t ns = t.tv_nsec + dt.tv_nsec;
-    int64_t s = t.tv_sec + dt.tv_nsec + ns / SEC_IN_NANOSEC;
+    int64_t s = t.tv_sec + ns / SEC_IN_NANOSEC;
     t.tv_sec = s;
     t.tv_nsec = ns % SEC_IN_NANOSEC; 
 }

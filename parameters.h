@@ -15,9 +15,9 @@
  * @brief TIME_DIFF_TOLERANCE means the maximum tolerable time difference between different client in seconds.
  * 
  */
-#define TIME_DIFF_TOLERANCE 20
+#define TIME_DIFF_TOLERANCE 10
 
-#define TIME_DRIFT_FACTOR   0.5
+#define TIME_DRIFT_FACTOR   0.25
 
 /**
  * @brief The upper bound of the communication delay in seconds.
@@ -41,5 +41,12 @@
 #define SERVER_IP           "127.0.0.1"
 #define CLIENT_IP           "127.0.0.1"
 #define UDP_BASE_PORT       8020
-#define TCP_BASE_PORT       8010
+#define SERVER_BASE_PORT    8000
+#define SERVER_LISTEN_PORT  SERVER_BASE_PORT
 
+/** @Insufficient balance error flag.
+* Client throw this flag when user trying to send an amt greater than its balance
+*/
+#define INSUFFICIENT_BALANCE_ERROR  -1
+#define ILLEGAL_SENDER_ERROR -2
+#define ILLEGAL_RECVER_ERROR -3

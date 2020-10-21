@@ -7,10 +7,10 @@ message: Msg.proto
 		$(PC) -I=. --cpp_out=. ./Msg.proto
 
 client: client.cpp Msg.pb.cc utility.cpp 
-		$(CC) $(CFLAGS) $^ $(PROTOBUF_LIB) -o $@
+		$(CC) $(CFLAGS) $^ $(PROTOBUF_LIB) -o $@ -g
 
 server:  server.cpp Msg.pb.cc utility.cpp
-		$(CC) $(CFLAGS) $^ $(PROTOBUF_LIB) -o $@
+		$(CC) $(CFLAGS) $^ $(PROTOBUF_LIB) -o $@ -g
 
 clean:
 		rm server client

@@ -199,30 +199,30 @@ class transaction_t PROTOBUF_FINAL :
     kReceiverIdFieldNumber = 2,
     kAmountFieldNumber = 3,
   };
-  // required int32 sender_id = 1;
+  // required fixed32 sender_id = 1;
   bool has_sender_id() const;
   private:
   bool _internal_has_sender_id() const;
   public:
   void clear_sender_id();
-  ::PROTOBUF_NAMESPACE_ID::int32 sender_id() const;
-  void set_sender_id(::PROTOBUF_NAMESPACE_ID::int32 value);
+  ::PROTOBUF_NAMESPACE_ID::uint32 sender_id() const;
+  void set_sender_id(::PROTOBUF_NAMESPACE_ID::uint32 value);
   private:
-  ::PROTOBUF_NAMESPACE_ID::int32 _internal_sender_id() const;
-  void _internal_set_sender_id(::PROTOBUF_NAMESPACE_ID::int32 value);
+  ::PROTOBUF_NAMESPACE_ID::uint32 _internal_sender_id() const;
+  void _internal_set_sender_id(::PROTOBUF_NAMESPACE_ID::uint32 value);
   public:
 
-  // required int32 receiver_id = 2;
+  // required fixed32 receiver_id = 2;
   bool has_receiver_id() const;
   private:
   bool _internal_has_receiver_id() const;
   public:
   void clear_receiver_id();
-  ::PROTOBUF_NAMESPACE_ID::int32 receiver_id() const;
-  void set_receiver_id(::PROTOBUF_NAMESPACE_ID::int32 value);
+  ::PROTOBUF_NAMESPACE_ID::uint32 receiver_id() const;
+  void set_receiver_id(::PROTOBUF_NAMESPACE_ID::uint32 value);
   private:
-  ::PROTOBUF_NAMESPACE_ID::int32 _internal_receiver_id() const;
-  void _internal_set_receiver_id(::PROTOBUF_NAMESPACE_ID::int32 value);
+  ::PROTOBUF_NAMESPACE_ID::uint32 _internal_receiver_id() const;
+  void _internal_set_receiver_id(::PROTOBUF_NAMESPACE_ID::uint32 value);
   public:
 
   // required float amount = 3;
@@ -250,8 +250,8 @@ class transaction_t PROTOBUF_FINAL :
   typedef void DestructorSkippable_;
   ::PROTOBUF_NAMESPACE_ID::internal::HasBits<1> _has_bits_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
-  ::PROTOBUF_NAMESPACE_ID::int32 sender_id_;
-  ::PROTOBUF_NAMESPACE_ID::int32 receiver_id_;
+  ::PROTOBUF_NAMESPACE_ID::uint32 sender_id_;
+  ::PROTOBUF_NAMESPACE_ID::uint32 receiver_id_;
   float amount_;
   friend struct ::TableStruct_Msg_2eproto;
 };
@@ -417,17 +417,17 @@ class message_t PROTOBUF_FINAL :
       ::transaction_t* transaction);
   ::transaction_t* unsafe_arena_release_transaction();
 
-  // required int32 client_id = 1;
+  // required fixed32 client_id = 1;
   bool has_client_id() const;
   private:
   bool _internal_has_client_id() const;
   public:
   void clear_client_id();
-  ::PROTOBUF_NAMESPACE_ID::int32 client_id() const;
-  void set_client_id(::PROTOBUF_NAMESPACE_ID::int32 value);
+  ::PROTOBUF_NAMESPACE_ID::uint32 client_id() const;
+  void set_client_id(::PROTOBUF_NAMESPACE_ID::uint32 value);
   private:
-  ::PROTOBUF_NAMESPACE_ID::int32 _internal_client_id() const;
-  void _internal_set_client_id(::PROTOBUF_NAMESPACE_ID::int32 value);
+  ::PROTOBUF_NAMESPACE_ID::uint32 _internal_client_id() const;
+  void _internal_set_client_id(::PROTOBUF_NAMESPACE_ID::uint32 value);
   public:
 
   // @@protoc_insertion_point(class_scope:message_t)
@@ -444,7 +444,7 @@ class message_t PROTOBUF_FINAL :
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   ::timestamp_t* timestamp_;
   ::transaction_t* transaction_;
-  ::PROTOBUF_NAMESPACE_ID::int32 client_id_;
+  ::PROTOBUF_NAMESPACE_ID::uint32 client_id_;
   friend struct ::TableStruct_Msg_2eproto;
 };
 // -------------------------------------------------------------------
@@ -572,30 +572,30 @@ class timestamp_t PROTOBUF_FINAL :
     kSecondsFieldNumber = 1,
     kNanosFieldNumber = 2,
   };
-  // required int64 seconds = 1;
+  // required fixed64 seconds = 1;
   bool has_seconds() const;
   private:
   bool _internal_has_seconds() const;
   public:
   void clear_seconds();
-  ::PROTOBUF_NAMESPACE_ID::int64 seconds() const;
-  void set_seconds(::PROTOBUF_NAMESPACE_ID::int64 value);
+  ::PROTOBUF_NAMESPACE_ID::uint64 seconds() const;
+  void set_seconds(::PROTOBUF_NAMESPACE_ID::uint64 value);
   private:
-  ::PROTOBUF_NAMESPACE_ID::int64 _internal_seconds() const;
-  void _internal_set_seconds(::PROTOBUF_NAMESPACE_ID::int64 value);
+  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_seconds() const;
+  void _internal_set_seconds(::PROTOBUF_NAMESPACE_ID::uint64 value);
   public:
 
-  // required int32 nanos = 2;
+  // required fixed32 nanos = 2;
   bool has_nanos() const;
   private:
   bool _internal_has_nanos() const;
   public:
   void clear_nanos();
-  ::PROTOBUF_NAMESPACE_ID::int32 nanos() const;
-  void set_nanos(::PROTOBUF_NAMESPACE_ID::int32 value);
+  ::PROTOBUF_NAMESPACE_ID::uint32 nanos() const;
+  void set_nanos(::PROTOBUF_NAMESPACE_ID::uint32 value);
   private:
-  ::PROTOBUF_NAMESPACE_ID::int32 _internal_nanos() const;
-  void _internal_set_nanos(::PROTOBUF_NAMESPACE_ID::int32 value);
+  ::PROTOBUF_NAMESPACE_ID::uint32 _internal_nanos() const;
+  void _internal_set_nanos(::PROTOBUF_NAMESPACE_ID::uint32 value);
   public:
 
   // @@protoc_insertion_point(class_scope:timestamp_t)
@@ -610,8 +610,8 @@ class timestamp_t PROTOBUF_FINAL :
   typedef void DestructorSkippable_;
   ::PROTOBUF_NAMESPACE_ID::internal::HasBits<1> _has_bits_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
-  ::PROTOBUF_NAMESPACE_ID::int64 seconds_;
-  ::PROTOBUF_NAMESPACE_ID::int32 nanos_;
+  ::PROTOBUF_NAMESPACE_ID::uint64 seconds_;
+  ::PROTOBUF_NAMESPACE_ID::uint32 nanos_;
   friend struct ::TableStruct_Msg_2eproto;
 };
 // -------------------------------------------------------------------
@@ -738,17 +738,17 @@ class request_t PROTOBUF_FINAL :
   enum : int {
     kTypeFieldNumber = 1,
   };
-  // required int32 type = 1;
+  // required fixed32 type = 1;
   bool has_type() const;
   private:
   bool _internal_has_type() const;
   public:
   void clear_type();
-  ::PROTOBUF_NAMESPACE_ID::int32 type() const;
-  void set_type(::PROTOBUF_NAMESPACE_ID::int32 value);
+  ::PROTOBUF_NAMESPACE_ID::uint32 type() const;
+  void set_type(::PROTOBUF_NAMESPACE_ID::uint32 value);
   private:
-  ::PROTOBUF_NAMESPACE_ID::int32 _internal_type() const;
-  void _internal_set_type(::PROTOBUF_NAMESPACE_ID::int32 value);
+  ::PROTOBUF_NAMESPACE_ID::uint32 _internal_type() const;
+  void _internal_set_type(::PROTOBUF_NAMESPACE_ID::uint32 value);
   public:
 
   // @@protoc_insertion_point(class_scope:request_t)
@@ -760,7 +760,7 @@ class request_t PROTOBUF_FINAL :
   typedef void DestructorSkippable_;
   ::PROTOBUF_NAMESPACE_ID::internal::HasBits<1> _has_bits_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
-  ::PROTOBUF_NAMESPACE_ID::int32 type_;
+  ::PROTOBUF_NAMESPACE_ID::uint32 type_;
   friend struct ::TableStruct_Msg_2eproto;
 };
 // ===================================================================
@@ -774,7 +774,7 @@ class request_t PROTOBUF_FINAL :
 #endif  // __GNUC__
 // transaction_t
 
-// required int32 sender_id = 1;
+// required fixed32 sender_id = 1;
 inline bool transaction_t::_internal_has_sender_id() const {
   bool value = (_has_bits_[0] & 0x00000001u) != 0;
   return value;
@@ -783,26 +783,26 @@ inline bool transaction_t::has_sender_id() const {
   return _internal_has_sender_id();
 }
 inline void transaction_t::clear_sender_id() {
-  sender_id_ = 0;
+  sender_id_ = 0u;
   _has_bits_[0] &= ~0x00000001u;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int32 transaction_t::_internal_sender_id() const {
+inline ::PROTOBUF_NAMESPACE_ID::uint32 transaction_t::_internal_sender_id() const {
   return sender_id_;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int32 transaction_t::sender_id() const {
+inline ::PROTOBUF_NAMESPACE_ID::uint32 transaction_t::sender_id() const {
   // @@protoc_insertion_point(field_get:transaction_t.sender_id)
   return _internal_sender_id();
 }
-inline void transaction_t::_internal_set_sender_id(::PROTOBUF_NAMESPACE_ID::int32 value) {
+inline void transaction_t::_internal_set_sender_id(::PROTOBUF_NAMESPACE_ID::uint32 value) {
   _has_bits_[0] |= 0x00000001u;
   sender_id_ = value;
 }
-inline void transaction_t::set_sender_id(::PROTOBUF_NAMESPACE_ID::int32 value) {
+inline void transaction_t::set_sender_id(::PROTOBUF_NAMESPACE_ID::uint32 value) {
   _internal_set_sender_id(value);
   // @@protoc_insertion_point(field_set:transaction_t.sender_id)
 }
 
-// required int32 receiver_id = 2;
+// required fixed32 receiver_id = 2;
 inline bool transaction_t::_internal_has_receiver_id() const {
   bool value = (_has_bits_[0] & 0x00000002u) != 0;
   return value;
@@ -811,21 +811,21 @@ inline bool transaction_t::has_receiver_id() const {
   return _internal_has_receiver_id();
 }
 inline void transaction_t::clear_receiver_id() {
-  receiver_id_ = 0;
+  receiver_id_ = 0u;
   _has_bits_[0] &= ~0x00000002u;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int32 transaction_t::_internal_receiver_id() const {
+inline ::PROTOBUF_NAMESPACE_ID::uint32 transaction_t::_internal_receiver_id() const {
   return receiver_id_;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int32 transaction_t::receiver_id() const {
+inline ::PROTOBUF_NAMESPACE_ID::uint32 transaction_t::receiver_id() const {
   // @@protoc_insertion_point(field_get:transaction_t.receiver_id)
   return _internal_receiver_id();
 }
-inline void transaction_t::_internal_set_receiver_id(::PROTOBUF_NAMESPACE_ID::int32 value) {
+inline void transaction_t::_internal_set_receiver_id(::PROTOBUF_NAMESPACE_ID::uint32 value) {
   _has_bits_[0] |= 0x00000002u;
   receiver_id_ = value;
 }
-inline void transaction_t::set_receiver_id(::PROTOBUF_NAMESPACE_ID::int32 value) {
+inline void transaction_t::set_receiver_id(::PROTOBUF_NAMESPACE_ID::uint32 value) {
   _internal_set_receiver_id(value);
   // @@protoc_insertion_point(field_set:transaction_t.receiver_id)
 }
@@ -862,7 +862,7 @@ inline void transaction_t::set_amount(float value) {
 
 // message_t
 
-// required int32 client_id = 1;
+// required fixed32 client_id = 1;
 inline bool message_t::_internal_has_client_id() const {
   bool value = (_has_bits_[0] & 0x00000004u) != 0;
   return value;
@@ -871,21 +871,21 @@ inline bool message_t::has_client_id() const {
   return _internal_has_client_id();
 }
 inline void message_t::clear_client_id() {
-  client_id_ = 0;
+  client_id_ = 0u;
   _has_bits_[0] &= ~0x00000004u;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int32 message_t::_internal_client_id() const {
+inline ::PROTOBUF_NAMESPACE_ID::uint32 message_t::_internal_client_id() const {
   return client_id_;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int32 message_t::client_id() const {
+inline ::PROTOBUF_NAMESPACE_ID::uint32 message_t::client_id() const {
   // @@protoc_insertion_point(field_get:message_t.client_id)
   return _internal_client_id();
 }
-inline void message_t::_internal_set_client_id(::PROTOBUF_NAMESPACE_ID::int32 value) {
+inline void message_t::_internal_set_client_id(::PROTOBUF_NAMESPACE_ID::uint32 value) {
   _has_bits_[0] |= 0x00000004u;
   client_id_ = value;
 }
-inline void message_t::set_client_id(::PROTOBUF_NAMESPACE_ID::int32 value) {
+inline void message_t::set_client_id(::PROTOBUF_NAMESPACE_ID::uint32 value) {
   _internal_set_client_id(value);
   // @@protoc_insertion_point(field_set:message_t.client_id)
 }
@@ -1060,7 +1060,7 @@ inline void message_t::set_allocated_transaction(::transaction_t* transaction) {
 
 // timestamp_t
 
-// required int64 seconds = 1;
+// required fixed64 seconds = 1;
 inline bool timestamp_t::_internal_has_seconds() const {
   bool value = (_has_bits_[0] & 0x00000001u) != 0;
   return value;
@@ -1069,26 +1069,26 @@ inline bool timestamp_t::has_seconds() const {
   return _internal_has_seconds();
 }
 inline void timestamp_t::clear_seconds() {
-  seconds_ = PROTOBUF_LONGLONG(0);
+  seconds_ = PROTOBUF_ULONGLONG(0);
   _has_bits_[0] &= ~0x00000001u;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int64 timestamp_t::_internal_seconds() const {
+inline ::PROTOBUF_NAMESPACE_ID::uint64 timestamp_t::_internal_seconds() const {
   return seconds_;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int64 timestamp_t::seconds() const {
+inline ::PROTOBUF_NAMESPACE_ID::uint64 timestamp_t::seconds() const {
   // @@protoc_insertion_point(field_get:timestamp_t.seconds)
   return _internal_seconds();
 }
-inline void timestamp_t::_internal_set_seconds(::PROTOBUF_NAMESPACE_ID::int64 value) {
+inline void timestamp_t::_internal_set_seconds(::PROTOBUF_NAMESPACE_ID::uint64 value) {
   _has_bits_[0] |= 0x00000001u;
   seconds_ = value;
 }
-inline void timestamp_t::set_seconds(::PROTOBUF_NAMESPACE_ID::int64 value) {
+inline void timestamp_t::set_seconds(::PROTOBUF_NAMESPACE_ID::uint64 value) {
   _internal_set_seconds(value);
   // @@protoc_insertion_point(field_set:timestamp_t.seconds)
 }
 
-// required int32 nanos = 2;
+// required fixed32 nanos = 2;
 inline bool timestamp_t::_internal_has_nanos() const {
   bool value = (_has_bits_[0] & 0x00000002u) != 0;
   return value;
@@ -1097,21 +1097,21 @@ inline bool timestamp_t::has_nanos() const {
   return _internal_has_nanos();
 }
 inline void timestamp_t::clear_nanos() {
-  nanos_ = 0;
+  nanos_ = 0u;
   _has_bits_[0] &= ~0x00000002u;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int32 timestamp_t::_internal_nanos() const {
+inline ::PROTOBUF_NAMESPACE_ID::uint32 timestamp_t::_internal_nanos() const {
   return nanos_;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int32 timestamp_t::nanos() const {
+inline ::PROTOBUF_NAMESPACE_ID::uint32 timestamp_t::nanos() const {
   // @@protoc_insertion_point(field_get:timestamp_t.nanos)
   return _internal_nanos();
 }
-inline void timestamp_t::_internal_set_nanos(::PROTOBUF_NAMESPACE_ID::int32 value) {
+inline void timestamp_t::_internal_set_nanos(::PROTOBUF_NAMESPACE_ID::uint32 value) {
   _has_bits_[0] |= 0x00000002u;
   nanos_ = value;
 }
-inline void timestamp_t::set_nanos(::PROTOBUF_NAMESPACE_ID::int32 value) {
+inline void timestamp_t::set_nanos(::PROTOBUF_NAMESPACE_ID::uint32 value) {
   _internal_set_nanos(value);
   // @@protoc_insertion_point(field_set:timestamp_t.nanos)
 }
@@ -1120,7 +1120,7 @@ inline void timestamp_t::set_nanos(::PROTOBUF_NAMESPACE_ID::int32 value) {
 
 // request_t
 
-// required int32 type = 1;
+// required fixed32 type = 1;
 inline bool request_t::_internal_has_type() const {
   bool value = (_has_bits_[0] & 0x00000001u) != 0;
   return value;
@@ -1129,21 +1129,21 @@ inline bool request_t::has_type() const {
   return _internal_has_type();
 }
 inline void request_t::clear_type() {
-  type_ = 0;
+  type_ = 0u;
   _has_bits_[0] &= ~0x00000001u;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int32 request_t::_internal_type() const {
+inline ::PROTOBUF_NAMESPACE_ID::uint32 request_t::_internal_type() const {
   return type_;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int32 request_t::type() const {
+inline ::PROTOBUF_NAMESPACE_ID::uint32 request_t::type() const {
   // @@protoc_insertion_point(field_get:request_t.type)
   return _internal_type();
 }
-inline void request_t::_internal_set_type(::PROTOBUF_NAMESPACE_ID::int32 value) {
+inline void request_t::_internal_set_type(::PROTOBUF_NAMESPACE_ID::uint32 value) {
   _has_bits_[0] |= 0x00000001u;
   type_ = value;
 }
-inline void request_t::set_type(::PROTOBUF_NAMESPACE_ID::int32 value) {
+inline void request_t::set_type(::PROTOBUF_NAMESPACE_ID::uint32 value) {
   _internal_set_type(value);
   // @@protoc_insertion_point(field_set:request_t.type)
 }
